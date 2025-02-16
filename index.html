@@ -1,16 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Game Site</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Game Hub</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: 2em;
+    }
+    .social-link {
+      text-decoration: none;
+      color: blue;
+      font-weight: bold;
+    }
+    .search-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .search-container input {
+      padding: 8px;
+      width: 80%;
+      max-width: 400px;
+      font-size: 16px;
+    }
+    .categories {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .categories button {
+      margin: 0 5px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }
+    .game-list {
+      list-style-type: none;
+      padding: 0;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .game-item {
+      padding: 10px;
+      border-bottom: 1px solid #ccc;
+    }
+    .game-item a {
+      text-decoration: none;
+      color: black;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-    <h1>Welcome to My Game Site!</h1>
-    <p>Click a game to play:</p>
-    <ul>
-        <li><a href="https://examplegame.com" target="_blank">Game 1</a></li>
-        <li><a href="https://anothergame.com" target="_blank">Game 2</a></li>
-    </ul>
+
+  <!-- Header with social media link -->
+  <header>
+    <h1>
+      My Social Media: 
+      <a href="https://guns.lol/xhlazz" class="social-link" target="_blank">
+        Click Me
+      </a>
+    </h1>
+  </header>
+
+  <!-- Search input -->
+  <div class="search-container">
+    <input type="text" id="gameSearch" placeholder="Search for games..." onkeyup="filterGames()" />
+  </div>
+
+  <!-- Category buttons -->
+  <div class="categories">
+    <button onclick="filterByCategory('all')">All</button>
+    <button onclick="filterByCategory('action')">Action</button>
+    <button onclick="filterByCategory('puzzle')">Puzzle</button>
+    <button onclick="filterByCategory('arcade')">Arcade</button>
+    <!-- Add more categories as needed -->
+  </div>
+
+  <!-- List of games -->
+  <ul class="game-list" id="gameList">
+    <!-- Example game items. To add a game, copy a line below and change the details: -->
+    <li class="game-item" data-category="action" data-title="Space Invaders">
+      <a href="https://example.com/space-invaders" target="_blank">
+        Space Invaders
+      </a> (Action)
+    </li>
+    <li class="game-item" data-category="puzzle" data-title="Tetris">
+      <a href="https://example.com/tetris" target="_blank">
+        Tetris
+      </a> (Puzzle)
+    </li>
+    <li class="game-item" data-category="arcade" data-title="Pac-Man">
+      <a href="https://example.com/pac-man" target="_blank">
+        Pac-Man
+      </a> (Arcade)
+    </li>
+  </ul>
+
+  <!-- JavaScript for filtering -->
+  <script>
+    // Filter games by search input
+    function filterGames() {
+      const input = document.getElementById('gameSearch');
+      const filter = input.value.toLowerCase();
+      const gameList = document.getElementById('gameList');
+      const gameItems = gameList.getElementsByClassName('game-item');
+
+      for (let i = 0; i < gameItems.length; i++) {
+        const title = gameItems[i].getAttribute('data-title').toLowerCase();
+        if (title.indexOf(filter) > -1) {
+          gameItems[i].style.display = "";
+        } else {
+          gameItems[i].style.display = "none";
+        }
+      }
+    }
+
+    // Filter games by category button click
+    function filterByCategory(category) {
+      const gameList = document.getElementById('gameList');
+      const gameItems = gameList.getElementsByClassName('game-item');
+
+      for (let i = 0; i < gameItems.length; i++) {
+        const itemCategory = gameItems[i].getAttribute('data-category');
+        if (category === 'all' || itemCategory === category) {
+          gameItems[i].style.display = "";
+        } else {
+          gameItems[i].style.display = "none";
+        }
+      }
+    }
+  </script>
+
 </body>
 </html>
