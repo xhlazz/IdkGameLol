@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Choose User</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Chat creado con los pies</h1>
+  <div class="user-container">
+    <div class="user" onclick="selectUser('xhlazz')">
+      <img src="path/to/xhlazz-photo.jpg" alt="xhlazz">
+      <span>xhlazz</span>
+    </div>
+    <div class="user" onclick="selectUser('Mikunef')">
+      <img src="path/to/mikunef-photo.jpg" alt="Mikunef">
+      <span>Mikunef</span>
+    </div>
+  </div>
+  <script>
+    function selectUser(username) {
+      localStorage.setItem('selectedUser', username); // Save the selected user
+      window.location.href = 'chat.html'; // Redirect to chat interface
+    }
+  </script>
+</body>
+</html>
