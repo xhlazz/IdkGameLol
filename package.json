@@ -1,19 +1,19 @@
 {
-  "name": "xhlazz-chat",
+  "name": "chaty",
   "version": "1.0.0",
-  "description": "A modern chat platform for xhlazz and Mikunef",
+  "description": "A modern, gamer-inspired chat application",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "socket.io": "^4.5.4",
     "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.3.1",
-    "cors": "^2.8.5"
+    "socket.io": "^4.5.4"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
