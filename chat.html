@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Chat</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="chat-header">
+    <img id="profilePicture" src="" alt="Profile Picture">
+    <div>
+      <h1 id="username"></h1>
+      <p id="description"></p>
+      <button onclick="editProfile()">Edit Profile</button>
+    </div>
+    <button onclick="exitChat()">Exit</button>
+  </div>
+  <div id="chatContainer" class="chat-container"></div>
+  <div class="chat-footer">
+    <input type="text" id="messageInput" placeholder="Type your message...">
+    <button id="sendButton">Send</button>
+  </div>
+
+  <!-- Profile Edit Modal -->
+  <div id="profileModal" class="modal hidden">
+    <h2>Edit Your Profile</h2>
+    <label for="newProfilePicture">Profile Picture:</label>
+    <input type="file" id="newProfilePicture" accept="image/*"><br>
+    
+    <label for="newDescription">Description:</label>
+    <textarea id="newDescription"></textarea><br>
+    
+    <button onclick="saveProfile()">Save</button>
+    <button onclick="closeModal()">Cancel</button>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
