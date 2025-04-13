@@ -53,11 +53,6 @@
       background: #0284c7;
       color: #e2e8f0;
     }
-    .error {
-      color: #f87171;
-      font-size: 0.9rem;
-      margin-top: 10px;
-    }
     .footer {
       margin-top: 20px;
       font-size: 0.8rem;
@@ -73,8 +68,7 @@
       <input type="password" id="password" placeholder="Password" required><br>
       <button type="submit">Login</button>
     </form>
-    <div class="error" id="error"></div>
-    <div class="footer">Modern Gamer Messenger</div>
+    <div class="footer">Chat creado con los pies</div>
   </div>
   <script>
     const form = document.getElementById('loginForm');
@@ -86,6 +80,7 @@
       const password = document.getElementById('password').value;
 
       try {
+        console.log("Sending login request...");
         const response = await fetch('http://localhost:3001/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
