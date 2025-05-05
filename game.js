@@ -11,7 +11,7 @@ let noChance = 25;
 let targets = [];
 let boosters = [];
 let particles = [];
-let pugReaction = "";
+let resultText = "";
 let gameRunning = true;
 
 // Utility functions
@@ -34,6 +34,12 @@ class Target {
     ctx.fillStyle = this.type === "yes" ? "#28a745" : "#dc3545";
     ctx.fill();
     ctx.closePath();
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "16px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(this.type.toUpperCase(), this.x, this.y);
   }
 
   update() {
@@ -63,6 +69,12 @@ class Booster {
     ctx.fillStyle = this.effect === "increaseYes" ? "#007bff" : "#ffc107";
     ctx.fill();
     ctx.closePath();
+
+    ctx.fillStyle = "#fff";
+    ctx.font = "12px Arial";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(this.effect === "increaseYes" ? "+Y" : "-N", this.x, this.y);
   }
 
   update() {
@@ -126,13 +138,13 @@ const checkCollision = (x, y, obj) => {
 };
 
 const updateChancesDisplay = () => {
-  document.getElementById("chances").textContent = `Yes: ${yesChance}% | No: ${noChance}%`;
+  document.getElementById("chances").textContent = `Chances: Yes - ${yesChance}%, No - ${noChance}%`;
 };
 
 const decidePugStream = () => {
   const randomNumber = Math.random() * 100;
-  pugReaction = randomNumber < yesChance ? "Yes! 🐶🎥" : "No 😴";
-  document.getElementById("result").textContent = `Pug Streaming Today? ${pugReaction}`;
+  resultText = randomNumber < yesChance ? "YES! 🐶🎥" : "NO 😴";
+  document.getElementById("result").textContent = `Is Pug streaming today? ${resultText}`;
 };
 
 // Handle clicks
@@ -144,6 +156,7 @@ canvas.addEventListener("click", (e) => {
   targets.forEach((target, index) => {
     if (checkCollision(mouseX, mouseY, target)) {
       explodeParticles(target.x, target.y, target.type === "yes" ? "#28a745" : "#dc3545");
+      targets.splice(index, 1);
       decidePugStream();
       gameRunning = false;
     }
