@@ -1,49 +1,62 @@
 body {
-  font-family: 'Poppins', sans-serif;
-  margin: 0;
-  background: #0f172a;
-  color: #e2e8f0;
-}
-
-h1, p {
-  margin: 0;
-}
-
-.profile-container, .chat-container {
-  max-width: 600px;
-  margin: 20px auto;
+  font-family: Arial, sans-serif;
   text-align: center;
+  background-color: #f4f4f9;
+  margin: 0;
+  padding: 0;
 }
 
-textarea, input[type="text"], input[type="file"] {
-  margin: 10px 0;
-  padding: 10px;
-  width: 90%;
+.game-container {
+  padding: 20px;
+  max-width: 500px;
+  margin: 100px auto;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.chat-header {
-  display: flex;
-  align-items: center;
-  background: #1e293b;
-  padding: 10px;
+h1 {
+  color: #333;
 }
 
-.chat-header img {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  margin-right: 10px;
+#chances {
+  font-size: 18px;
+  margin: 20px 0;
 }
 
-.message {
-  display: flex;
-  align-items: center;
-  margin: 10px 0;
+button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.message-profile-picture {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  margin-right: 10px;
+#play-button {
+  background-color: #007bff;
+  color: white;
+}
+
+#play-button:hover {
+  background-color: #0056b3;
+}
+
+.boosters {
+  margin-top: 20px;
+}
+
+.booster {
+  margin: 5px;
+  background-color: #28a745;
+  color: white;
+}
+
+.booster:hover {
+  background-color: #1c7430;
+}
+
+#result {
+  margin-top: 20px;
+  font-weight: bold;
+  font-size: 20px;
 }
