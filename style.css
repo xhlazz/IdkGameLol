@@ -3,6 +3,7 @@ body {
   padding: 0;
   font-family: Arial, sans-serif;
   background: linear-gradient(180deg, #87CEEB, #f4f4f9);
+  overflow: hidden;
 }
 
 .game-container {
@@ -27,11 +28,15 @@ canvas {
   color: #333;
   font-size: 18px;
   font-weight: bold;
+  z-index: 10;
 }
 
 #result {
   margin-top: 10px;
+  font-size: 24px;
+  font-weight: bold;
   animation: fadeInOut 2s ease-in-out forwards;
+  color: #333;
 }
 
 @keyframes fadeInOut {
