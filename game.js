@@ -143,7 +143,7 @@ const updateChancesDisplay = () => {
 
 const decidePugStream = () => {
   const randomNumber = Math.random() * 100;
-  resultText = randomNumber < yesChance ? "YES! 🐶🎥" : "NO 😴";
+  resultText = randomNumber < yesChance ? "YES! 🎥" : "NO 😴";
   document.getElementById("result").textContent = `Is Pug streaming today? ${resultText}`;
 };
 
