@@ -3,19 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pug Stream Roulette</title>
+  <title>Pug Stream Roulette - Mini Game</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="game-container">
-    <h1>Pug Stream Roulette</h1>
-    <p id="chances">Chances: Yes - 75%, No - 25%</p>
-    <button id="play-button">Will the Pug Stream Today?</button>
-    <p id="result"></p>
-    <div class="boosters">
-      <h2>Boosters</h2>
-      <button class="booster" id="increase-yes">Increase Yes Chance</button>
-      <button class="booster" id="decrease-no">Decrease No Chance</button>
+    <canvas id="gameCanvas"></canvas>
+    <div id="hud">
+      <p id="chances">Yes: 75% | No: 25%</p>
+      <p id="result"></p>
     </div>
   </div>
   <script src="game.js"></script>
