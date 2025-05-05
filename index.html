@@ -3,33 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Select Profile</title>
+  <title>Pug Stream Roulette</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Choose Your Profile</h1>
-  <div class="user-container">
-    <div class="user" onclick="selectUser('xhlazz')">
-      <img src="path/to/xhlazz-photo.jpg" alt="xhlazz">
-      <span>xhlazz</span>
-    </div>
-    <div class="user" onclick="selectUser('Mikunef')">
-      <img src="path/to/mikunef-photo.jpg" alt="Mikunef">
-      <span>Mikunef</span>
+  <div class="game-container">
+    <h1>Pug Stream Roulette</h1>
+    <p id="chances">Chances: Yes - 75%, No - 25%</p>
+    <button id="play-button">Will the Pug Stream Today?</button>
+    <p id="result"></p>
+    <div class="boosters">
+      <h2>Boosters</h2>
+      <button class="booster" id="increase-yes">Increase Yes Chance</button>
+      <button class="booster" id="decrease-no">Decrease No Chance</button>
     </div>
   </div>
-  <script>
-    function selectUser(username) {
-      localStorage.setItem('selectedUser', username); // Save the selected user
-      if (username === 'xhlazz') {
-        localStorage.setItem('profilePicture', 'path/to/xhlazz-photo.jpg');
-        localStorage.setItem('description', 'The one and only xhlazz!');
-      } else if (username === 'Mikunef') {
-        localStorage.setItem('profilePicture', 'path/to/mikunef-photo.jpg');
-        localStorage.setItem('description', 'Mikunef, the vocaloid fan!');
-      }
-      window.location.href = 'chat.html'; // Redirect to chat interface
-    }
-  </script>
+  <script src="game.js"></script>
 </body>
 </html>
