@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Retro Obby Monster-Killer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="main-menu" class="centered">
+    <h1>Retro Obby Monster-Killer</h1>
+    <button id="start-btn">Start Game</button>
+    <div id="character-select">
+      <h2>Choose Your Character</h2>
+      <div id="characters">
+        <div class="character" data-char="melkin">
+          <img src="assets/characters/melkin.png" alt="MElkin"/>
+          <span>MElkin</span>
+        </div>
+        <!-- More characters can be added here -->
+      </div>
+    </div>
+  </div>
+  <canvas id="game-canvas" width="512" height="320" style="display:none"></canvas>
+  <div id="gui" style="display:none">
+    <div id="gui-health"></div>
+    <div id="gui-lives"></div>
+    <div id="gui-level"></div>
+    <div id="gui-score"></div>
+  </div>
+  <script src="game.js"></script>
+</body>
+</html>
