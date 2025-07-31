@@ -42,6 +42,8 @@ body {
   background: #222;
   cursor: pointer;
   transition: border 0.2s;
+  min-width: 100px;
+  min-height: 180px;
 }
 
 .character.selected, .character:hover {
@@ -49,11 +51,31 @@ body {
   background: #333;
 }
 
-.character img {
+.character canvas {
   width: 48px;
   height: 48px;
   image-rendering: pixelated;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+  margin-top: 4px;
+}
+
+.character span {
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.char-desc {
+  color: #fffd;
+  font-size: 13px;
+  text-align: center;
+  margin: 4px 0;
+}
+
+.char-power {
+  color: #77fba4;
+  font-size: 12px;
+  text-align: center;
+  margin-top: 2px;
 }
 
 #game-canvas {
