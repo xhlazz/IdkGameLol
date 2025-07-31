@@ -7,13 +7,23 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="game-bg"></div>
   <div id="main-menu" class="centered">
-    <h1>Retro Obby Monster-Killer</h1>
-    <button id="start-btn">Play</button>
+    <h1>Retro <span class="highlight">Obby</span> Monster-Killer</h1>
     <div id="character-select">
       <h2>Choose Your Character</h2>
       <div id="characters"></div>
     </div>
+    <button id="start-btn">Play</button>
+    <div class="controls-help">
+      <b>Controls:</b> ←→ Move &nbsp; | &nbsp; Space: Jump &nbsp; | &nbsp; Z: Attack<br>
+      <span class="power-info">
+        Melkin: Shift = Super Jump &nbsp;|&nbsp;
+        Blockster: E = Shield &nbsp;|&nbsp;
+        Ghosty: Hold E = Phase
+      </span>
+    </div>
+    <div class="footer">Made by xhlazz &copy; 2025</div>
   </div>
   <canvas id="game-canvas" width="512" height="320" style="display:none"></canvas>
   <div id="gui" style="display:none">
@@ -22,6 +32,7 @@
     <div id="gui-level"></div>
     <div id="gui-score"></div>
   </div>
+  <div id="fade" style="display:none"></div>
   <script src="game.js"></script>
 </body>
 </html>
