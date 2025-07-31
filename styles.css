@@ -15,7 +15,7 @@ body {
   left: 0; top: 0; width: 100vw; height: 100vh; z-index: 0;
   background: linear-gradient(180deg, #232a48 0%, #1c1534 70%, #231a13 100%);
   background-size: cover;
-  filter: blur(2px) brightness(0.8);
+  filter: blur(2.5px) brightness(0.8);
   pointer-events: none;
   transition: filter 0.6s;
 }
@@ -25,34 +25,44 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  min-height: 100vh;
   position: relative;
   z-index: 2;
 }
 
 #main-menu {
-  background: rgba(26,20,46,0.95);
+  background: rgba(26,20,46,0.97);
   border: 4px solid #4fd4f6;
-  border-radius: 18px;
+  border-radius: 24px;
   padding: 36px 58px 24px 58px;
   box-shadow: 0 0 38px #171c34, 0 0 0 4px #1d2d43;
   min-width: 420px;
+  max-width: 560px;
 }
 
 #main-menu h1 {
-  font-size: 2.3em;
+  font-size: 2.4em;
   letter-spacing: 2px;
   margin: 0 0 18px 0;
   color: #fff;
-  text-shadow: 0 2px 0 #20c9f6, 2px 3px 0 #010c18;
+  text-shadow: 0 4px 0 #20c9f6, 2px 4px 0 #010c18;
+  text-align: center;
 }
 #main-menu .highlight {
   color: #4fd4f6;
-  text-shadow: 0 2px 0 #20c9f6, 2px 3px 0 #010c18;
+  text-shadow: 0 3px 0 #4fd4f6, 2px 3px 0 #010c18;
 }
 
 #character-select {
   margin-bottom: 18px;
+}
+
+#character-select h2 {
+  text-align: center;
+  color: #4fd4f6;
+  text-shadow: 0 2px #121655;
+  font-size: 1.1em;
+  margin-bottom: 8px;
 }
 
 #characters {
@@ -67,20 +77,21 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 12px 10px;
+  padding: 13px 12px;
   border: 3px solid #3d388a;
-  border-radius: 8px;
+  border-radius: 12px;
   background: #211f34;
   cursor: pointer;
   transition: border 0.2s, background 0.2s, transform 0.18s;
   min-width: 110px;
-  min-height: 180px;
+  min-height: 185px;
   box-shadow: 0 2px 12px #0008;
 }
 .character.selected, .character:hover {
-  border: 3px solid #4fd4f6;
-  background: #262e53;
-  transform: scale(1.04);
+  border: 3px solid #54fffa;
+  background: #272e53;
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px #4fd4f6a0, 0 2px 12px #0008;
 }
 
 .character canvas {
@@ -111,30 +122,40 @@ body {
   margin-top: 0px;
 }
 
+.play-btn-row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 18px 0 0 0;
+  width: 100%;
+}
+
 #start-btn {
   font-family: 'Press Start 2P', monospace, sans-serif;
-  font-size: 18px;
+  font-size: 22px;
   background: linear-gradient(90deg, #4fd4f6 60%, #1e213f 100%);
-  color: #222;
+  color: #181a28;
   border: none;
-  border-radius: 8px;
-  padding: 14px 54px;
-  margin: 18px 0 0 0;
-  box-shadow: 0 4px 12px #1e213f;
-  letter-spacing: 1px;
+  border-radius: 13px;
+  padding: 16px 68px;
+  box-shadow: 0 4px 24px #4fd4f6a0, 0 2px 12px #1e213f;
+  letter-spacing: 2px;
   cursor: pointer;
-  transition: background 0.2s, color 0.2s, transform 0.13s;
+  font-weight: bold;
+  transition: background 0.21s, color 0.18s, transform 0.15s, box-shadow 0.2s;
 }
 #start-btn:hover {
-  background: linear-gradient(90deg, #1e213f 0%, #4fd4f6 100%);
+  background: linear-gradient(90deg, #2af0ed 0%, #1e213f 100%);
   color: #fff;
-  transform: scale(1.06);
+  transform: scale(1.07);
+  box-shadow: 0 6px 32px #6cffd5b0, 0 2px 12px #1e213f;
+  outline: 2px solid #4fd4f6;
 }
 
 .controls-help {
   font-size: 13px;
   color: #b1d7fc;
-  margin-top: 16px;
+  margin-top: 24px;
   margin-bottom: 2px;
   text-align: center;
   letter-spacing: 0.5px;
@@ -149,14 +170,14 @@ body {
 .footer {
   color: #3bbedc;
   font-size: 11px;
-  margin-top: 18px;
+  margin-top: 24px;
   text-align: right;
   opacity: 0.7;
 }
 
 #game-canvas {
   display: block;
-  margin: 38px auto 0 auto;
+  margin: 40px auto 0 auto;
   background: #232a3d;
   border: 7px solid #4fd4f6;
   border-radius: 14px;
