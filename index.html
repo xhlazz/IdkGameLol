@@ -5,45 +5,18 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Te Amo Sorpresa</title>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-      width: 100vw;
-      height: 100vh;
-      background: radial-gradient(ellipse at bottom, #4a1b5f 0%, #0e1c39 100%);
-      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-    }
+    html, body {margin:0; padding:0; width:100vw; height:100vh; overflow:hidden;
+      background:radial-gradient(ellipse at bottom, #4a1b5f 0%, #0e1c39 100%);
+      font-family:'Arial Rounded MT Bold', Arial, sans-serif;}
     #stars-bg, #surprise-canvas {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100vw; height: 100vh;
-      z-index: 0;
-      pointer-events: none;
-      display: block;
-    }
+      position: absolute; left:0; top:0; width:100vw; height:100vh; z-index:0; pointer-events:none;}
     #center-btn {
-      position: absolute;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      background: #fff;
-      color: #d9296a;
-      border: none;
-      padding: 1em 2.2em;
-      font-size: 2em;
-      font-weight: bold;
-      letter-spacing: 0.06em;
-      border-radius: 1em;
-      box-shadow: 0 0 38px #fff7, 0 0 18px #ff6ec7;
-      z-index: 2;
-      cursor: pointer;
-      transition: opacity 0.5s;
-    }
-    #center-btn:active {
-      background: #ffeaff;
-      box-shadow: 0 0 20px #ff6ec7;
-    }
-    #surprise-canvas { z-index: 1; display: none; }
+      position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
+      background:#fff; color:#d9296a; border:none; padding:1em 2.2em; font-size:2em; font-weight:bold;
+      letter-spacing:0.06em; border-radius:1em; box-shadow:0 0 38px #fff7, 0 0 18px #ff6ec7;
+      z-index:2; cursor:pointer; transition:opacity 0.5s;}
+    #center-btn:active {background:#ffeaff; box-shadow:0 0 20px #ff6ec7;}
+    #surprise-canvas {z-index:1; display:none;}
   </style>
 </head>
 <body>
@@ -51,7 +24,7 @@
   <button id="center-btn">Click Para Una Sorpresa</button>
   <canvas id="surprise-canvas"></canvas>
   <script>
-    // --- STAR BACKGROUND with shooting star ---
+    // --- STAR BACKGROUND ---
     const starsCanvas = document.getElementById('stars-bg');
     const starsCtx = starsCanvas.getContext('2d');
     let stars = [], shootingStar = null;
@@ -59,8 +32,7 @@
       starsCanvas.width = window.innerWidth;
       starsCanvas.height = window.innerHeight;
     }
-    resizeStarsCanvas();
-    window.addEventListener('resize', resizeStarsCanvas);
+    resizeStarsCanvas(); window.addEventListener('resize', resizeStarsCanvas);
 
     function createStars() {
       stars = [];
@@ -130,73 +102,73 @@
     }
     drawStars();
 
-    // --- MODERN HEART ANIMATION ---
-    const btn = document.getElementById('center-btn');
-    const canvas = document.getElementById('surprise-canvas');
-    const ctx = canvas.getContext('2d');
-    function resizeSurpriseCanvas() {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
+    // --- HEART SHAPE (Perfect outline using parametric) ---
+    function getHeartOutline(w, h, n) {
+      let cx = w/2, cy = h*0.45, r = Math.min(w,h)/3.2;
+      let coords = [];
+      for (let i = 0; i < n; i++) {
+        let theta = Math.PI * 2 * i / n;
+        // Cardioid parametric for perfect heart
+        let px = cx + r * 16 * Math.pow(Math.sin(theta),3) / 17;
+        let py = cy - r * (13 * Math.cos(theta) - 5 * Math.cos(2*theta) - 2 * Math.cos(3*theta) - Math.cos(4*theta)) / 17;
+        coords.push({x:px, y:py, theta});
+      }
+      return coords;
     }
-    resizeSurpriseCanvas();
-    window.addEventListener('resize', resizeSurpriseCanvas);
 
-    // Draw a cute turret: arms animate for shooting, bounce for dancing
-    function drawCharacter(ctx, x, y, facing, shootPhase, dancePhase, frame) {
+    // --- CUTE TURRET DRAW ---
+    function drawTurret(ctx, x, y, facing, shootAnim, dance, frame) {
       ctx.save();
       ctx.translate(x, y);
-
-      // Modern bounce for dance
-      if (dancePhase > 0) {
-        ctx.translate(0, Math.sin(frame * 0.20 + (facing === 'left' ? 1 : 0)) * 10 * dancePhase);
-        ctx.rotate(Math.sin(frame*0.14 + (facing==='left'?1.7:0))*0.19*dancePhase);
+      // Dance: bounce and wiggle
+      if (dance) {
+        ctx.translate(0, Math.sin(frame*0.20 + (facing==='left'?1:0))*10);
+        ctx.rotate(Math.sin(frame*0.14+(facing==='left'?1.7:0))*0.19);
       }
+      ctx.scale(facing==='left'?-1:1, 1);
 
-      ctx.scale(facing === 'left' ? -1 : 1, 1);
-
-      // Glow
-      if (shootPhase > 0.1) {
-        ctx.save();
-        ctx.globalAlpha = 0.22 + shootPhase*0.18;
-        ctx.shadowColor = "#ff1361";
-        ctx.shadowBlur = 19 * shootPhase;
-        ctx.beginPath();
-        ctx.arc(0, 0, 27, 0, Math.PI*2);
-        ctx.fillStyle = "#ff1361";
-        ctx.fill();
-        ctx.restore();
-      }
+      // Glow cheeks
+      ctx.save();
+      ctx.globalAlpha = 0.30 + shootAnim*0.4;
+      ctx.shadowColor = "#ff69b4";
+      ctx.shadowBlur = 16 + shootAnim*15;
+      ctx.beginPath();
+      ctx.arc(-8,7,6,0,Math.PI*2);
+      ctx.arc(8,7,6,0,Math.PI*2);
+      ctx.fillStyle = "#ff69b4";
+      ctx.fill();
+      ctx.restore();
 
       // Body
       ctx.beginPath();
-      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+      ctx.arc(0, 0, 20, 0, Math.PI*2);
       ctx.fillStyle = "#fff";
       ctx.shadowColor = "#666";
       ctx.shadowBlur = 8;
       ctx.fill();
       ctx.shadowBlur = 0;
 
-      // Eyes
-      ctx.beginPath(); ctx.arc(-7, -3, 3.2, 0, Math.PI * 2);
-      ctx.arc(7, -3, 3.2, 0, Math.PI * 2);
+      // Eyes (big, bright)
+      ctx.beginPath(); ctx.arc(-7,-3,3.6,0,Math.PI*2);
+      ctx.arc(7,-3,3.6,0,Math.PI*2);
       ctx.fillStyle = "#222";
       ctx.fill();
 
-      // Smile (big smile if dancing)
+      // Smile (big if dance)
       ctx.beginPath();
-      let smileY = dancePhase ? 13 : 8;
-      let smileR = dancePhase ? 9.5 : 7.5;
-      ctx.arc(0, smileY, smileR, Math.PI*0.14, Math.PI*0.86);
+      let smileY = dance ? 13 : 8;
+      let smileR = dance ? 9.5 : 7.5;
+      ctx.arc(0, smileY, smileR, Math.PI*0.14,Math.PI*0.86);
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 2.3;
       ctx.stroke();
 
       // Arms: recoil and glow when shooting
       ctx.save();
-      let armsUp = shootPhase ? Math.sin(frame*0.39)*0.38+0.77*shootPhase : (dancePhase?0.4:0.08);
+      let armsUp = shootAnim ? Math.sin(frame*0.39)*0.38+0.77*shootAnim : (dance?0.4:0.08);
       ctx.rotate(-armsUp);
       ctx.beginPath();
-      ctx.arc(-15, 10, 7, Math.PI*0.4, Math.PI*1.6);
+      ctx.arc(-15,10,7,Math.PI*0.4,Math.PI*1.6);
       ctx.lineWidth = 7;
       ctx.strokeStyle = "#fff";
       ctx.stroke();
@@ -208,7 +180,7 @@
       ctx.save();
       ctx.rotate(armsUp);
       ctx.beginPath();
-      ctx.arc(15, 10, 7, Math.PI*1.6, Math.PI*0.4, true);
+      ctx.arc(15,10,7,Math.PI*1.6,Math.PI*0.4,true);
       ctx.lineWidth = 7;
       ctx.strokeStyle = "#fff";
       ctx.stroke();
@@ -219,147 +191,180 @@
 
       // Saucer
       ctx.save();
-      ctx.translate(0, 24);
+      ctx.translate(0,24);
       ctx.beginPath();
-      ctx.ellipse(0, 0, 22, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0,0,22,8,0,0,Math.PI*2);
       ctx.fillStyle = "#eee";
       ctx.fill();
       ctx.beginPath();
-      ctx.ellipse(0, 0, 22, 8, 0, 0, Math.PI * 2);
+      ctx.ellipse(0,0,22,8,0,0,Math.PI*2);
       ctx.strokeStyle = "#999";
       ctx.lineWidth = 2.8;
       ctx.stroke();
       ctx.restore();
 
+      // Shooting Glow
+      if (shootAnim>0.08 && frame%20<10) {
+        ctx.save();
+        ctx.globalAlpha = 0.22+shootAnim*0.3;
+        ctx.shadowColor = "#ff1361";
+        ctx.shadowBlur = 32*shootAnim;
+        ctx.beginPath();
+        ctx.arc(0,0,27,0,Math.PI*2);
+        ctx.fillStyle = "#ff1361";
+        ctx.fill();
+        ctx.restore();
+      }
       ctx.restore();
     }
 
-    // Heart outline curve
-    function getHeartOutline(w, h, heartsCount) {
-      let cx = w / 2, cy = h * 0.45, r = Math.min(w,h)/3.1;
-      let coords = [];
-      for (let i = 0; i < heartsCount; i++) {
-        let t = i / (heartsCount - 1);
-        let angle = Math.PI * (1.13 * t + 0.18);
-        let px = cx + Math.sin(angle) * r * (1 - 0.24 * Math.abs(t - 0.5));
-        let py = cy - Math.cos(angle) * r - 42 * Math.abs(t - 0.5);
-        coords.push({x: px, y: py, angle});
-      }
-      return coords;
+    // --- HEART EMOJI ---
+    function drawEmojiHeart(ctx,x,y,size,rot,alpha,glow=0) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = `bold ${size}px serif`;
+      ctx.translate(x,y);
+      ctx.rotate(rot);
+      ctx.shadowColor = "#ff1361";
+      ctx.shadowBlur = size*0.21+glow;
+      ctx.fillText("❤️",0,0);
+      ctx.restore();
     }
 
-    // Fly-in hearts
-    let flyingHearts = [], animationFrame = 0, shooting = true, dancing = false;
-    let SHOOT_DURATION_FRAMES = 120; // 5s @ 24fps
+    // --- HEART ANIMATION STAGES ---
+    // STAGE 0: Turrets shoot hearts to center
+    // STAGE 1: Hearts float and wiggle in center
+    // STAGE 2: Levitate hearts to heart outline
+    // STAGE 3: Heart outline spins 360° and "Te amo" appears
+    let flyingHearts = [], animationFrame = 0, stage = 0;
+    let HEARTS_COUNT = 64;
+    let heartOutline = [];
+    let rotateHeart = 0;
+    let STAGE0_FRAMES = 55;
+    let STAGE1_FRAMES = 55;
+    let STAGE2_FRAMES = 60;
+    let STAGE3_FRAMES = 44;
 
-    function startHeartAnimation() {
+    function setupHeartAnimation() {
+      animationFrame = 0; stage = 0; rotateHeart = 0;
       flyingHearts = [];
-      animationFrame = 0;
-      shooting = true;
-      dancing = false;
       const w = canvas.width, h = canvas.height;
-      const heartOutline = getHeartOutline(w, h, 84);
+      heartOutline = getHeartOutline(w,h,HEARTS_COUNT);
 
-      // Calculate stagger for smooth ~5s animation
-      let totalFrames = SHOOT_DURATION_FRAMES;
-      let spread = Math.max(heartOutline.length-1,1);
-      for (let i = 0; i < heartOutline.length; i++) {
-        let t = i / spread;
-        let fromX = t < 0.5 ? 60 : w-60;
+      // Launch from turrets to center
+      let cx=w/2, cy=h*0.41;
+      for (let i=0;i<HEARTS_COUNT;i++) {
+        let t = i/(HEARTS_COUNT-1);
+        let fromX = t<0.5?60:w-60;
         let fromY = h-65;
-        let {x: toX, y: toY} = heartOutline[i];
-        let cpX = (fromX + toX)/2 + (t<0.5?-68:68);
-        let cpY = Math.min(fromY, toY) - 140;
+        let angle = Math.random()*Math.PI/3 - Math.PI/6; // random spread
+        let midX = cx + Math.cos(angle)*60;
+        let midY = cy + Math.sin(angle)*60;
         flyingHearts.push({
-          fromX, fromY, cpX, cpY, toX, toY,
-          progress: 0,
-          arrived: false,
-          scale: 0.7,
-          alpha: 0.2,
-          rot: Math.random()*2*Math.PI,
-          startFrame: Math.round(i * totalFrames/spread*0.98)
+          stage:0,
+          fromX, fromY, midX, midY, cx, cy,
+          x:fromX, y:fromY,
+          scale:0.7, alpha:0.1, rot:Math.random()*2*Math.PI,
+          outlineX:heartOutline[i].x, outlineY:heartOutline[i].y, outlineTheta:heartOutline[i].theta,
+          levitateY: cy - Math.random()*40,
+          levitateX: cx + Math.sin(Math.PI*2*i/HEARTS_COUNT)*18,
+          levitateWiggle: Math.random()*Math.PI*2
         });
       }
     }
 
-    // Draw emoji heart with modern effect
-    function drawEmojiHeart(ctx, x, y, size, rot, alpha, glow=0) {
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.font = `bold ${size}px serif`;
-      ctx.translate(x, y);
-      ctx.rotate(rot);
-      ctx.shadowColor = "#ff1361";
-      ctx.shadowBlur = size*0.21+glow;
-      ctx.fillText("❤️", 0, 0);
-      ctx.restore();
-    }
-
-    // Main animation loop
+    // --- MAIN ANIMATION LOOP ---
     function drawScene() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-      // Compute shooting/dancing phases
-      let allArrived = flyingHearts.every(h=>h.arrived);
-      let shootPhase = shooting && !allArrived ? 1 : 0;
-      let dancePhase = dancing && allArrived ? 1 : 0;
+      // Turret animation
+      let shootAnim = 0, danceAnim = 0;
+      if (stage===0 && animationFrame<STAGE0_FRAMES) shootAnim = 1;
+      if (stage===3) danceAnim = 1;
 
       // Draw turrets
-      drawCharacter(ctx, 60, canvas.height - 65, 'right', shootPhase, dancePhase, animationFrame);
-      drawCharacter(ctx, canvas.width - 60, canvas.height - 65, 'left', shootPhase, dancePhase, animationFrame);
+      drawTurret(ctx,60,canvas.height-65,'right',shootAnim,danceAnim,animationFrame);
+      drawTurret(ctx,canvas.width-60,canvas.height-65,'left',shootAnim,danceAnim,animationFrame);
 
-      // Animate hearts
-      for (let i = 0; i < flyingHearts.length; i++) {
+      // Hearts logic by stage
+      let cx = canvas.width/2, cy = canvas.height*0.41;
+      for (let i=0;i<HEARTS_COUNT;i++) {
         let heart = flyingHearts[i];
-        let localFrame = animationFrame - heart.startFrame;
-        if (localFrame < 0) {
-          // Not launched yet
-          continue;
-        } else if (!heart.arrived) {
-          let t = Math.min(localFrame / (SHOOT_DURATION_FRAMES/1.25), 1);
-          heart.progress = t;
-          if (t >= 1) {
-            heart.arrived = true;
-            heart.scale = 1;
-            heart.alpha = 1;
-            heart.rot = 0;
-          }
+        let t = i/(HEARTS_COUNT-1);
+
+        // STAGE 0: fly from turret to center
+        if (stage===0) {
+          let ft = Math.min(1, animationFrame/STAGE0_FRAMES);
+          let stagger = Math.max(0, (animationFrame - t*10)/STAGE0_FRAMES);
+          let prog = Math.min(1, stagger);
+          // Quadratic curve
+          heart.x = (1-prog)*(1-prog)*heart.fromX + 2*(1-prog)*prog*heart.midX + prog*prog*heart.cx;
+          heart.y = (1-prog)*(1-prog)*heart.fromY + 2*(1-prog)*prog*heart.midY + prog*prog*heart.cy;
+          heart.scale = 0.7+0.3*prog;
+          heart.alpha = 0.1+0.9*prog;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.1+Math.PI*t;
         }
-        let t = heart.progress;
-        let bx = (1-t)*(1-t)*heart.fromX + 2*(1-t)*t*heart.cpX + t*t*heart.toX;
-        let by = (1-t)*(1-t)*heart.fromY + 2*(1-t)*t*heart.cpY + t*t*heart.toY;
-        let scale = heart.arrived ? 1 : 0.7+0.35*t;
-        let alpha = heart.arrived ? 1 : 0.25+0.75*t;
-        let rot = heart.arrived ? 0 : heart.rot*(1-t) + Math.sin(animationFrame*.13+i)*0.15*(1-t);
-        let glow = heart.arrived ? 12 : 0;
-        drawEmojiHeart(ctx, bx, by, 34*scale, rot, alpha, glow);
+        // STAGE 1: levitate in center
+        else if (stage===1) {
+          let floatProg = Math.min(1, animationFrame/STAGE1_FRAMES);
+          heart.x = heart.cx + Math.sin(animationFrame*0.14+i)*12;
+          heart.y = heart.levitateY + Math.sin(animationFrame*0.18+i+heart.levitateWiggle)*11;
+          heart.scale = 0.93+0.15*Math.sin(animationFrame*0.13+i);
+          heart.alpha = 1;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.19;
+        }
+        // STAGE 2: fly from center to outline
+        else if (stage===2) {
+          let prog = Math.min(1,animationFrame/STAGE2_FRAMES);
+          heart.x = (1-prog)*(1-prog)*heart.cx + 2*(1-prog)*prog*heart.levitateX + prog*prog*heart.outlineX;
+          heart.y = (1-prog)*(1-prog)*heart.cy + 2*(1-prog)*prog*heart.levitateY + prog*prog*heart.outlineY;
+          heart.scale = 0.95+0.17*prog;
+          heart.alpha = 1;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.19*(1-prog);
+        }
+        // STAGE 3: heart rotates
+        else if (stage===3) {
+          let spin = rotateHeart;
+          let tx = heartOutline[i].x-cx, ty = heartOutline[i].y-cy;
+          let rx = tx*Math.cos(spin)-ty*Math.sin(spin);
+          let ry = tx*Math.sin(spin)+ty*Math.cos(spin);
+          heart.x = cx+rx; heart.y = cy+ry;
+          heart.scale = 1.08+0.12*Math.sin(animationFrame*0.11+i);
+          heart.alpha = 1;
+          heart.rot = spin + Math.PI*t;
+        }
+        drawEmojiHeart(ctx,heart.x,heart.y,34*heart.scale,heart.rot,heart.alpha,stage>=2?12:0);
       }
 
-      // If all hearts arrived, start dance
-      if (allArrived) {
-        shooting = false;
-        dancing = true;
-        // Modern glowing text
+      // Text appears after heart spins
+      if (stage===3 && rotateHeart>=2*Math.PI) {
         ctx.save();
-        ctx.font = "bold 60px Arial Rounded MT Bold, Arial, sans-serif";
+        ctx.font = "bold 63px Arial Rounded MT Bold, Arial, sans-serif";
         ctx.fillStyle = "#fa4f86";
         ctx.textAlign = "center";
         ctx.shadowColor = "#ff1361";
-        ctx.shadowBlur = 28;
+        ctx.shadowBlur = 34;
         ctx.globalAlpha = 1;
-        ctx.fillText("Te amo", canvas.width / 2, canvas.height * 0.18);
+        ctx.fillText("Te amo", canvas.width/2, canvas.height*0.18);
         ctx.restore();
       }
+
+      // Stage transitions
+      if (stage===0 && animationFrame>STAGE0_FRAMES+12) {stage=1;animationFrame=0;}
+      else if (stage===1 && animationFrame>STAGE1_FRAMES+12) {stage=2;animationFrame=0;}
+      else if (stage===2 && animationFrame>STAGE2_FRAMES+8) {stage=3;animationFrame=0;}
+      else if (stage===3 && rotateHeart<2*Math.PI) {rotateHeart+=Math.PI/(STAGE3_FRAMES*0.6);}
 
       animationFrame++;
       requestAnimationFrame(drawScene);
     }
 
+    const btn = document.getElementById('center-btn');
     btn.addEventListener("click", () => {
       btn.style.opacity = 0;
       setTimeout(() => { btn.style.display = 'none'; }, 600);
       canvas.style.display = "block";
-      startHeartAnimation();
+      setupHeartAnimation();
       drawScene();
     });
   </script>
