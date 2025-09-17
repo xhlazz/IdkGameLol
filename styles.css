@@ -4,7 +4,7 @@ body, html {
   width: 100vw;
   height: 100vh;
   overflow: hidden;
-  background: black;
+  background: radial-gradient(ellipse at bottom, #491a5e 0%, #0d1c39 100%);
   font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
 }
 #stars-bg {
@@ -14,6 +14,7 @@ body, html {
   left: 0;
   top: 0;
   z-index: 0;
+  pointer-events: none;
 }
 #center-btn {
   position: absolute;
@@ -21,19 +22,21 @@ body, html {
   top: 50%;
   transform: translate(-50%, -50%);
   background: #fff;
-  color: #222;
+  color: #b00b6a;
   border: none;
   padding: 1em 2em;
   font-size: 2em;
+  font-weight: bold;
+  letter-spacing: 0.06em;
   border-radius: 1em;
-  box-shadow: 0 0 30px #fff7;
+  box-shadow: 0 0 30px #fff7, 0 0 8px #ff6ec7;
   z-index: 2;
   cursor: pointer;
   transition: opacity 0.5s;
 }
 #center-btn:active {
-  background: #eee;
-  box-shadow: 0 0 20px #fff4;
+  background: #ffeaff;
+  box-shadow: 0 0 20px #ff6ec7;
 }
 #surprise-canvas {
   position: absolute;
