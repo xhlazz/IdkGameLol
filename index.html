@@ -152,10 +152,20 @@
     resizeSurpriseCanvas();
     window.addEventListener('resize', resizeSurpriseCanvas);
 
-    function drawCharacter(ctx, x, y, facing = 'right', sitting = true) {
+    // --- CHARACTER/TURRET DRAW ---
+    function drawCharacter(ctx, x, y, facing, shooting, dancing, frame) {
       ctx.save();
       ctx.translate(x, y);
+
+      // DANCE: bounce and wiggle after shooting
+      if (dancing) {
+        let dancePhase = Math.sin(frame * 0.18 + (facing === 'left' ? 1 : 0)) * 8;
+        ctx.translate(0, dancePhase);
+        ctx.rotate(Math.sin(frame*0.13 + (facing==='left'?1.7:0))*0.15);
+      }
+
       ctx.scale(facing === 'left' ? -1 : 1, 1);
+
       // Body
       ctx.beginPath();
       ctx.arc(0, 0, 18, 0, Math.PI * 2);
@@ -164,27 +174,48 @@
       ctx.shadowBlur = 8;
       ctx.fill();
       ctx.shadowBlur = 0;
+
       // Eyes
       ctx.beginPath(); ctx.arc(-6, -2, 3.2, 0, Math.PI * 2);
       ctx.arc(6, -2, 3.2, 0, Math.PI * 2);
       ctx.fillStyle = "#222";
       ctx.fill();
-      // Smile
+
+      // Smile (big smile if dancing)
       ctx.beginPath();
-      ctx.arc(0, 7, 7, Math.PI*0.15, Math.PI*0.85);
+      let smileY = dancing ? 11 : 7;
+      let smileR = dancing ? 8.5 : 7;
+      ctx.arc(0, smileY, smileR, Math.PI*0.15, Math.PI*0.85);
       ctx.strokeStyle = "#222";
       ctx.lineWidth = 2;
       ctx.stroke();
-      // Sitting hands
+
+      // Arms: recoil when shooting
+      ctx.save();
+      let armsUp = shooting ? Math.sin(frame*0.35)*0.4+0.7 : (dancing?0.4:0.05);
+      ctx.rotate(-armsUp);
       ctx.beginPath();
-      ctx.arc(-11, 15, 4.5, Math.PI*0.9, Math.PI*2, false);
-      ctx.arc(11, 15, 4.5, Math.PI*1, Math.PI*2.1, false);
+      ctx.arc(-13, 8, 7, Math.PI*0.4, Math.PI*1.6);
       ctx.lineWidth = 6;
       ctx.strokeStyle = "#fff";
       ctx.stroke();
       ctx.lineWidth = 2;
       ctx.strokeStyle = "#222";
       ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.rotate(armsUp);
+      ctx.beginPath();
+      ctx.arc(13, 8, 7, Math.PI*1.6, Math.PI*0.4, true);
+      ctx.lineWidth = 6;
+      ctx.strokeStyle = "#fff";
+      ctx.stroke();
+      ctx.lineWidth = 2;
+      ctx.strokeStyle = "#222";
+      ctx.stroke();
+      ctx.restore();
+
       // Saucer
       ctx.save();
       ctx.translate(0, 22);
@@ -198,6 +229,20 @@
       ctx.lineWidth = 2.5;
       ctx.stroke();
       ctx.restore();
+
+      // Shooting "glow"
+      if (shooting && frame%20<10) {
+        ctx.save();
+        ctx.globalAlpha = 0.35;
+        ctx.shadowColor = "#ff1361";
+        ctx.shadowBlur = 16;
+        ctx.beginPath();
+        ctx.arc(0, 0, 23, 0, Math.PI*2);
+        ctx.fillStyle = "#ff1361";
+        ctx.fill();
+        ctx.restore();
+      }
+
       ctx.restore();
     }
 
@@ -218,21 +263,21 @@
     // --- ANIMATED EMOJI HEART FLY-IN ---
     let flyingHearts = [];
     let animationFrame = 0;
-    let allArrived = false;
+    let shooting = true;
+    let dancing = false;
     function startHeartAnimation() {
       flyingHearts = [];
       animationFrame = 0;
-      allArrived = false;
+      shooting = true;
+      dancing = false;
       const w = canvas.width, h = canvas.height;
       const heartOutline = getHeartOutline(w, h, 42);
 
-      // Hearts fly in from bottom left/right toward each destination
       for (let i = 0; i < heartOutline.length; i++) {
         let t = i / (heartOutline.length - 1);
         let fromX = t < 0.5 ? 60 : w-60;
         let fromY = h-65;
         let {x: toX, y: toY} = heartOutline[i];
-        // Control point for arc
         let cpX = (fromX + toX)/2 + (t<0.5?-60:60);
         let cpY = Math.min(fromY, toY) - 120;
         flyingHearts.push({
@@ -262,11 +307,11 @@
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       // Characters on saucers
-      drawCharacter(ctx, 60, canvas.height - 65, 'right', true);
-      drawCharacter(ctx, canvas.width - 60, canvas.height - 65, 'left', true);
+      let allArrived = flyingHearts.every(h=>h.arrived);
+      drawCharacter(ctx, 60, canvas.height - 65, 'right', shooting && !allArrived, dancing && allArrived, animationFrame);
+      drawCharacter(ctx, canvas.width - 60, canvas.height - 65, 'left', shooting && !allArrived, dancing && allArrived, animationFrame);
 
       // Animate hearts
-      allArrived = flyingHearts.every(h=>h.arrived);
       for (let i = 0; i < flyingHearts.length; i++) {
         let heart = flyingHearts[i];
         if (!heart.arrived) {
@@ -295,6 +340,8 @@
         ctx.shadowBlur = 20;
         ctx.fillText("Te amo", canvas.width / 2, canvas.height * 0.18);
         ctx.restore();
+        shooting = false;
+        dancing = true;
       }
 
       animationFrame++;
