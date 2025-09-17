@@ -1,7 +1,7 @@
-// --- STAR BACKGROUND ---
+// --- STAR BACKGROUND with shooting star ---
 const starsCanvas = document.getElementById('stars-bg');
 const starsCtx = starsCanvas.getContext('2d');
-let stars = [];
+let stars = [], shootingStar = null;
 function resizeStarsCanvas() {
   starsCanvas.width = window.innerWidth;
   starsCanvas.height = window.innerHeight;
@@ -26,6 +26,13 @@ function createStars() {
       });
     }
   }
+  shootingStar = {
+    progress: 0,
+    x0: Math.random() * starsCanvas.width * 0.5 + starsCanvas.width * 0.1,
+    y0: Math.random() * starsCanvas.height * 0.2 + starsCanvas.height * 0.1,
+    dx: Math.random() * 80 + 70,
+    dy: Math.random() * 30 + 10
+  };
 }
 createStars();
 window.addEventListener('resize', createStars);
@@ -45,12 +52,33 @@ function drawStars() {
     starsCtx.fill();
     starsCtx.shadowBlur = 0;
   }
+  // Shooting star
+  if (shootingStar) {
+    let p = shootingStar.progress;
+    if (p < 1) {
+      let x = shootingStar.x0 + shootingStar.dx * p;
+      let y = shootingStar.y0 + shootingStar.dy * p;
+      starsCtx.save();
+      starsCtx.globalAlpha = 0.7;
+      starsCtx.strokeStyle = "#fff";
+      starsCtx.lineWidth = 2.4;
+      starsCtx.beginPath();
+      starsCtx.moveTo(x-shootingStar.dx*0.22, y-shootingStar.dy*0.22);
+      starsCtx.lineTo(x, y);
+      starsCtx.stroke();
+      starsCtx.restore();
+      shootingStar.progress += 0.008;
+      if (shootingStar.progress > 1.05) shootingStar = null;
+    } else if (Math.random() < 0.002) {
+      createStars();
+    }
+  }
   requestAnimationFrame(drawStars);
 }
 drawStars();
 
 // --- CUTE CHARACTER DRAW ---
-function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
+function drawCharacter(ctx, x, y, facing = 'right', sitting = true) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(facing === 'left' ? -1 : 1, 1);
@@ -73,43 +101,29 @@ function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
   ctx.strokeStyle = "#222";
   ctx.lineWidth = 2;
   ctx.stroke();
-  // Hands
-  if (!sitting) {
-    ctx.beginPath();
-    ctx.arc(-13, 8, 7, Math.PI*0.4, Math.PI*1.6);
-    ctx.arc(13, 8, 7, Math.PI*1.6, Math.PI*0.4, true);
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "#fff";
-    ctx.stroke();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#222";
-    ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.arc(-11, 15, 4.5, Math.PI*0.9, Math.PI*2, false);
-    ctx.arc(11, 15, 4.5, Math.PI*1, Math.PI*2.1, false);
-    ctx.lineWidth = 6;
-    ctx.strokeStyle = "#fff";
-    ctx.stroke();
-    ctx.lineWidth = 2;
-    ctx.strokeStyle = "#222";
-    ctx.stroke();
-  }
+  // Sitting hands
+  ctx.beginPath();
+  ctx.arc(-11, 15, 4.5, Math.PI*0.9, Math.PI*2, false);
+  ctx.arc(11, 15, 4.5, Math.PI*1, Math.PI*2.1, false);
+  ctx.lineWidth = 6;
+  ctx.strokeStyle = "#fff";
+  ctx.stroke();
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = "#222";
+  ctx.stroke();
   // Saucer
-  if (sitting) {
-    ctx.save();
-    ctx.translate(0, 22);
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 18, 7, 0, 0, Math.PI * 2);
-    ctx.fillStyle = "#eee";
-    ctx.fill();
-    ctx.beginPath();
-    ctx.ellipse(0, 0, 18, 7, 0, 0, Math.PI * 2);
-    ctx.strokeStyle = "#999";
-    ctx.lineWidth = 2.5;
-    ctx.stroke();
-    ctx.restore();
-  }
+  ctx.save();
+  ctx.translate(0, 22);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 18, 7, 0, 0, Math.PI * 2);
+  ctx.fillStyle = "#eee";
+  ctx.fill();
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 18, 7, 0, 0, Math.PI * 2);
+  ctx.strokeStyle = "#999";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+  ctx.restore();
   ctx.restore();
 }
 
@@ -120,7 +134,7 @@ function drawSmoothHeart(ctx, x, y, size, color, rot = 0, alpha = 1, shine = tru
   ctx.rotate(rot);
   ctx.globalAlpha = alpha;
   ctx.beginPath();
-  for (let t = 0; t < Math.PI * 2; t += 0.06) {
+  for (let t = 0; t < Math.PI * 2; t += 0.07) {
     let px = size * 16 * Math.pow(Math.sin(t), 3) / 17;
     let py = -size * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t)) / 17;
     if (t === 0) ctx.moveTo(px, py);
@@ -145,70 +159,45 @@ function drawSmoothHeart(ctx, x, y, size, color, rot = 0, alpha = 1, shine = tru
   ctx.restore();
 }
 
-// --- HEART ARC SCENE ---
-function heartArcScene(ctx, w, h, frame) {
-  drawStars(ctx, heartArcScene.stars, w, h);
-  drawCharacter(ctx, 50, h - 65, 'right');
-  drawCharacter(ctx, w - 50, h - 65, 'left');
-  let n = 22;
-  for (let i = 0; i < n; i++) {
-    let t = i / (n - 1);
-    let x1 = 50, y1 = h - 65;
-    let x2 = w / 2, y2 = h * 0.33;
-    let cx = w / 2 - 100, cy = h * 0.15;
-    let bx = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * cx + t * t * x2;
-    let by = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * cy + t * t * y2;
-    drawSmoothHeart(ctx, bx, by, 13, "#ff1361", Math.sin(frame * 0.07 + i) * 0.4);
-    x1 = w - 50;
-    x2 = w / 2;
-    cx = w / 2 + 100;
-    bx = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * cx + t * t * x2;
-    by = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * cy + t * t * y2;
-    drawSmoothHeart(ctx, bx, by, 13, "#ff1361", Math.sin(frame * 0.07 + i + 1) * 0.4);
-  }
-}
+// --- HEART OUTLINE SCENE ---
+function heartOutlineScene(ctx, w, h, frame) {
+  drawStars(ctx, heartOutlineScene.stars, w, h);
 
-// --- HEART SHAPE SCENE ---
-function heartShapeScene(ctx, w, h, frame) {
-  drawStars(ctx, heartShapeScene.stars, w, h);
+  // Characters on saucers
   drawCharacter(ctx, 60, h - 65, 'right', true);
   drawCharacter(ctx, w - 60, h - 65, 'left', true);
+
+  // "Te amo" text
   ctx.save();
-  ctx.font = "bold 44px Arial Rounded MT Bold, Arial, sans-serif";
-  ctx.fillStyle = "#ff6ec7";
+  ctx.font = "bold 50px Arial Rounded MT Bold, Arial, sans-serif";
+  ctx.fillStyle = "#fa4f86";
   ctx.textAlign = "center";
   ctx.shadowColor = "#ff1361";
-  ctx.shadowBlur = 16;
-  ctx.fillText("Te amo", w / 2, h * 0.18);
+  ctx.shadowBlur = 20;
+  ctx.fillText("Te amo", w / 2, h * 0.20);
   ctx.restore();
-  let n = 38;
-  let cx = w / 2, cy = h * 0.36, r = 83;
+
+  // Heart outline made from hearts
+  let n = 42;
+  let cx = w / 2, cy = h * 0.45, r = 110;
   for (let i = 0; i < n; i++) {
     let t = i / (n - 1);
-    let a = Math.PI * (1.13 * t + 0.2);
-    let px = cx + Math.sin(a) * r * (1 - 0.18 * Math.abs(t - 0.5));
-    let py = cy - Math.cos(a) * r - 30 * Math.abs(t - 0.5);
-    drawSmoothHeart(ctx, px, py, 15, "#ff1361", Math.sin(frame * 0.12 + i) * 0.23);
+    // Heart parametric: a curve to resemble your reference
+    let angle = Math.PI * (1.12 * t + 0.2);
+    let px = cx + Math.sin(angle) * r * (1 - 0.23 * Math.abs(t - 0.5));
+    let py = cy - Math.cos(angle) * r - 37 * Math.abs(t - 0.5);
+    drawSmoothHeart(ctx, px, py, 15, "#fb1458", 0, 1, true);
   }
 }
 
-// --- SCENE SWITCHER ---
 function runAnimation() {
   const canvas = document.getElementById("surprise-canvas");
   const w = canvas.width = window.innerWidth;
   const h = canvas.height = window.innerHeight;
-  heartArcScene.stars = createStars(w, h);
-  heartShapeScene.stars = heartArcScene.stars;
+  heartOutlineScene.stars = createStars(w, h);
   let frame = 0;
-  let scene = 0;
-  let switchTime = 220;
   function draw() {
-    if (scene === 0) {
-      heartArcScene(canvas.getContext('2d'), w, h, frame);
-      if (frame > switchTime) scene = 1;
-    } else {
-      heartShapeScene(canvas.getContext('2d'), w, h, frame - switchTime);
-    }
+    heartOutlineScene(canvas.getContext('2d'), w, h, frame);
     frame++;
     requestAnimationFrame(draw);
   }
