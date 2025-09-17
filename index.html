@@ -1,40 +1,210 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=512, initial-scale=1.0"/>
-  <title>Retro Obby Monster-Killer</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Te Amo Sorpresa</title>
+  <style>
+    body, html {
+      margin: 0; padding: 0;
+      width: 100vw; height: 100vh;
+      overflow: hidden; background: black;
+      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+    }
+    #stars-bg { position: absolute; width: 100vw; height: 100vh; left: 0; top: 0; z-index: 0;}
+    #center-btn {
+      position: absolute;
+      left: 50%; top: 50%; transform: translate(-50%, -50%);
+      background: #fff;
+      color: #222;
+      border: none;
+      padding: 1em 2em;
+      font-size: 2em;
+      border-radius: 1em;
+      box-shadow: 0 0 30px #fff7;
+      z-index: 2;
+      cursor: pointer;
+      transition: opacity 0.5s;
+    }
+    #surprise-canvas {
+      position: absolute;
+      left: 0; top: 0;
+      width: 100vw; height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-  <div id="game-bg"></div>
-  <div id="main-menu" class="centered">
-    <h1>Retro <span class="highlight">Obby</span> Monster-Killer</h1>
-    <div id="character-select">
-      <h2>Choose Your Character</h2>
-      <div id="characters"></div>
-    </div>
-    <div class="play-btn-row">
-      <button id="start-btn">▶ Play</button>
-    </div>
-    <div class="controls-help">
-      <b>Controls:</b> &larr;&rarr; Move &nbsp; | &nbsp; Space: Jump &nbsp; | &nbsp; Z: Attack<br>
-      <span class="power-info">
-        Melkin: Shift = Super Jump &nbsp;|&nbsp;
-        Blockster: E = Shield &nbsp;|&nbsp;
-        Ghosty: Hold E = Phase
-      </span>
-    </div>
-    <div class="footer">Made by <span style="color:#4fd4f6">xhlazz</span> &copy; 2025</div>
-  </div>
-  <canvas id="game-canvas" width="512" height="320" style="display:none"></canvas>
-  <div id="gui" style="display:none">
-    <div id="gui-health"></div>
-    <div id="gui-lives"></div>
-    <div id="gui-level"></div>
-    <div id="gui-score"></div>
-  </div>
-  <div id="fade" style="display:none"></div>
-  <script src="game.js"></script>
-</body>
-</html>
+  <canvas id="stars-bg"></canvas>
+  <button id="center-btn">Click Para Una Sorpresa</button>
+  <canvas id="surprise-canvas"></canvas>
+  <script>
+    // --- STARS Background ---
+    const starsCanvas = document.getElementById('stars-bg');
+    const starsCtx = starsCanvas.getContext('2d');
+    let stars = [];
+    function resizeStarsCanvas() {
+      starsCanvas.width = window.innerWidth;
+      starsCanvas.height = window.innerHeight;
+    }
+    resizeStarsCanvas();
+    window.addEventListener('resize', resizeStarsCanvas);
+    // Generate stars
+    for (let i = 0; i < 120; i++) {
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 1.5 + 0.5,
+        a: Math.random() * Math.PI * 2,
+        tw: Math.random() * 0.5 + 0.5,
+      });
+    }
+    function drawStars() {
+      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+      for (const star of stars) {
+        star.a += 0.02 + star.tw * 0.01;
+        const alpha = 0.6 + Math.sin(star.a) * 0.4;
+        starsCtx.beginPath();
+        starsCtx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        starsCtx.fillStyle = `rgba(255,255,255,${alpha})`;
+        starsCtx.fill();
+      }
+      requestAnimationFrame(drawStars);
+    }
+    drawStars();
+
+    // --- SURPRISE Animation ---
+    const btn = document.getElementById('center-btn');
+    const surpriseCanvas = document.getElementById('surprise-canvas');
+    const ctx = surpriseCanvas.getContext('2d');
+
+    function resizeSurpriseCanvas() {
+      surpriseCanvas.width = window.innerWidth;
+      surpriseCanvas.height = window.innerHeight;
+    }
+    resizeSurpriseCanvas();
+    window.addEventListener('resize', resizeSurpriseCanvas);
+
+    // Pixel Art Turrets (as simple 16x32)
+    function drawTurret(ctx, x, y, side, frame) {
+      // Simple pixel art: base, barrel, blinking light
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(3, 3); // Enlarge pixel art x3
+      if (side === 'left') ctx.scale(-1, 1);
+      // Base
+      ctx.fillStyle = '#333';
+      ctx.fillRect(-8, 8, 16, 12); // Base
+      ctx.fillStyle = '#666';
+      ctx.fillRect(-4, 6, 8, 4); // Mid
+      // Barrel
+      ctx.fillStyle = '#ddd';
+      ctx.fillRect(-2, -8, 4, 16); // Barrel
+      // Blinking light
+      ctx.beginPath();
+      ctx.arc(0, 10, 2, 0, Math.PI*2);
+      ctx.fillStyle = frame % 40 < 20 ? '#f00' : '#ee0';
+      ctx.fill();
+      ctx.restore();
+    }
+
+    // Pixel Art Heart
+    function drawPixelHeart(ctx, x, y, size, color, rot=0) {
+      // Draw a simple pixel art heart
+      //  0110
+      // 1111
+      // 1111
+      // 0110
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.scale(size, size);
+      ctx.fillStyle = color;
+      const heartPixels = [
+        [0,1,1,0],
+        [1,1,1,1],
+        [1,1,1,1],
+        [0,1,1,0],
+      ];
+      for(let r=0; r<4; r++) {
+        for(let c=0;c<4;c++) {
+          if(heartPixels[r][c]) {
+            ctx.fillRect(c-2, r-2, 1, 1);
+          }
+        }
+      }
+      ctx.restore();
+    }
+
+    // Heart shooting & Te Amo layout
+    let hearts = [];
+    let animFrame = 0;
+    let turretsVisible = false;
+    let bigHeartAngle = 0;
+    // Pixel positions for "TE AMO" in hearts (grid)
+    const teAmoPixels = [
+      // T
+      [1,0],[1,1],[1,2],[1,3],[1,4],[1,5],[1,6],
+      [0,3],[2,3],
+      // E
+      [4,0],[4,1],[4,2],[4,3],[4,4],[4,5],[4,6],
+      [5,0],[5,3],[5,6],
+      // A
+      [7,1],[7,2],[7,3],[7,4],[7,5],[7,6],
+      [8,0],[9,0],[8,3],[9,3],
+      // M
+      [11,0],[11,1],[11,2],[11,3],[11,4],[11,5],[11,6],
+      [12,3],[13,0],[13,3],[14,0],[14,1],[14,2],[14,3],[14,4],[14,5],[14,6],
+      // O
+      [16,1],[16,2],[16,3],[16,4],[16,5],[16,6],[17,0],[18,0],[17,6],[18,6],[18,1],[18,2],[18,3],[18,4],[18,5],
+    ];
+
+    function startSurprise() {
+      btn.style.opacity = 0;
+      setTimeout(() => { btn.style.display = 'none'; }, 600);
+      surpriseCanvas.style.display = 'block';
+      turretsVisible = true;
+      hearts = [];
+      animFrame = 0;
+    }
+
+    btn.addEventListener('click', startSurprise);
+
+    // Animate hearts flying from turrets to positions
+    function animateSurprise() {
+      ctx.clearRect(0, 0, surpriseCanvas.width, surpriseCanvas.height);
+
+      const w = surpriseCanvas.width, h = surpriseCanvas.height;
+      const turretY = h/2-40, turretX1 = w/2-170, turretX2 = w/2+170;
+
+      // Draw turrets
+      if (turretsVisible) {
+        drawTurret(ctx, turretX1, turretY, 'left', animFrame);
+        drawTurret(ctx, turretX2, turretY, 'right', animFrame);
+
+        // Launch hearts to "TE AMO"
+        if (hearts.length < teAmoPixels.length) {
+          // Launch one heart per few frames from random turret
+          if (animFrame % 8 === 0) {
+            const idx = hearts.length;
+            const px = teAmoPixels[idx][0], py = teAmoPixels[idx][1];
+            // Calculate target position for letter
+            const gridSize = 28;
+            const tx = w/2 - gridSize*10 + px*gridSize;
+            const ty = h/2 - 90 + py*gridSize;
+            const fromTurret = Math.random() < 0.5 ? [turretX1, turretY-30] : [turretX2, turretY-30];
+            hearts.push({
+              x: fromTurret[0], y: fromTurret[1], tx, ty,
+              progress: 0,
+              color: '#ff1361',
+              rot: 0,
+            });
+          }
+        }
+
+        // Animate hearts flying to their spots
+        for (const heart of hearts) {
+          if (heart.progress < 1) {
+            heart.x
