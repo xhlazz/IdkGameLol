@@ -1,9 +1,59 @@
-// --- Utility: Draw Cute Character ---
+// --- STAR BACKGROUND ---
+const starsCanvas = document.getElementById('stars-bg');
+const starsCtx = starsCanvas.getContext('2d');
+let stars = [];
+function resizeStarsCanvas() {
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+}
+resizeStarsCanvas();
+window.addEventListener('resize', resizeStarsCanvas);
+
+function createStars() {
+  stars = [];
+  let layers = [0.3, 0.6, 1];
+  let colors = ['#fff', '#aef', '#fee'];
+  for (let l = 0; l < layers.length; l++) {
+    for (let i = 0; i < 36 + l * 6; i++) {
+      stars.push({
+        x: Math.random() * window.innerWidth,
+        y: Math.random() * window.innerHeight,
+        r: Math.random() * 1.2 + 0.7 + l * 0.4,
+        a: Math.random() * Math.PI * 2,
+        tw: Math.random() * 0.8 + 0.3,
+        layer: layers[l],
+        color: colors[l]
+      });
+    }
+  }
+}
+createStars();
+window.addEventListener('resize', createStars);
+
+function drawStars() {
+  starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+  for (const star of stars) {
+    star.a += 0.015 + star.tw * 0.009;
+    let alpha = 0.6 + Math.sin(star.a) * 0.37;
+    let px = star.x + Math.sin(star.a * 0.11) * 6 * star.layer;
+    let py = star.y + Math.cos(star.a * 0.13) * 3.5 * star.layer;
+    starsCtx.beginPath();
+    starsCtx.arc(px, py, star.r, 0, Math.PI * 2);
+    starsCtx.fillStyle = `rgba(${star.color === '#fff' ? '255,255,255' : star.color === '#aef' ? '170,238,255' : '255,238,238'},${alpha})`;
+    starsCtx.shadowColor = star.color;
+    starsCtx.shadowBlur = 10 * star.layer;
+    starsCtx.fill();
+    starsCtx.shadowBlur = 0;
+  }
+  requestAnimationFrame(drawStars);
+}
+drawStars();
+
+// --- CUTE CHARACTER DRAW ---
 function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
   ctx.save();
   ctx.translate(x, y);
   ctx.scale(facing === 'left' ? -1 : 1, 1);
-
   // Body
   ctx.beginPath();
   ctx.arc(0, 0, 18, 0, Math.PI * 2);
@@ -12,20 +62,17 @@ function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
   ctx.shadowBlur = 8;
   ctx.fill();
   ctx.shadowBlur = 0;
-
   // Eyes
   ctx.beginPath(); ctx.arc(-6, -2, 3.2, 0, Math.PI * 2);
   ctx.arc(6, -2, 3.2, 0, Math.PI * 2);
   ctx.fillStyle = "#222";
   ctx.fill();
-
   // Smile
   ctx.beginPath();
   ctx.arc(0, 7, 7, Math.PI*0.15, Math.PI*0.85);
   ctx.strokeStyle = "#222";
   ctx.lineWidth = 2;
   ctx.stroke();
-
   // Hands
   if (!sitting) {
     ctx.beginPath();
@@ -38,7 +85,6 @@ function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
     ctx.strokeStyle = "#222";
     ctx.stroke();
   } else {
-    // Sitting hands
     ctx.beginPath();
     ctx.arc(-11, 15, 4.5, Math.PI*0.9, Math.PI*2, false);
     ctx.arc(11, 15, 4.5, Math.PI*1, Math.PI*2.1, false);
@@ -49,7 +95,6 @@ function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
     ctx.strokeStyle = "#222";
     ctx.stroke();
   }
-
   // Saucer
   if (sitting) {
     ctx.save();
@@ -65,11 +110,10 @@ function drawCharacter(ctx, x, y, facing = 'right', sitting = false) {
     ctx.stroke();
     ctx.restore();
   }
-
   ctx.restore();
 }
 
-// --- Utility: Draw Smooth Heart ---
+// --- SMOOTH HEART DRAW ---
 function drawSmoothHeart(ctx, x, y, size, color, rot = 0, alpha = 1, shine = true) {
   ctx.save();
   ctx.translate(x, y);
@@ -101,65 +145,20 @@ function drawSmoothHeart(ctx, x, y, size, color, rot = 0, alpha = 1, shine = tru
   ctx.restore();
 }
 
-// --- Utility: Starry Background ---
-function createStars(w, h, layers = 3) {
-  let stars = [];
-  let colors = ['#fff', '#aef', '#fee'];
-  for (let l = 0; l < layers; l++) {
-    for (let i = 0; i < 30 + l * 7; i++) {
-      stars.push({
-        x: Math.random() * w,
-        y: Math.random() * h,
-        r: Math.random() * 1.5 + 0.5 + l * 0.4,
-        a: Math.random() * Math.PI * 2,
-        tw: Math.random() * 0.6 + 0.4,
-        layer: (l + 1) / layers,
-        color: colors[l % colors.length]
-      });
-    }
-  }
-  return stars;
-}
-
-function drawStars(ctx, stars, w, h) {
-  ctx.clearRect(0, 0, w, h);
-  for (const star of stars) {
-    star.a += 0.016 + star.tw * 0.011;
-    let alpha = 0.6 + Math.sin(star.a) * 0.4;
-    let px = star.x + Math.sin(star.a * 0.1) * 5 * star.layer;
-    let py = star.y + Math.cos(star.a * 0.13) * 3 * star.layer;
-    ctx.beginPath();
-    ctx.arc(px, py, star.r, 0, Math.PI * 2);
-    ctx.fillStyle = `rgba(${star.color === '#fff' ? '255,255,255' : star.color === '#aef' ? '170,238,255' : '255,238,238'},${alpha})`;
-    ctx.shadowColor = star.color;
-    ctx.shadowBlur = 8 * star.layer;
-    ctx.fill();
-    ctx.shadowBlur = 0;
-  }
-}
-
-// --- Heart Arc Scene ---
+// --- HEART ARC SCENE ---
 function heartArcScene(ctx, w, h, frame) {
-  // Draw stars
   drawStars(ctx, heartArcScene.stars, w, h);
-
-  // Characters
   drawCharacter(ctx, 50, h - 65, 'right');
   drawCharacter(ctx, w - 50, h - 65, 'left');
-
-  // Heart arcs
   let n = 22;
   for (let i = 0; i < n; i++) {
     let t = i / (n - 1);
-    // Left arc
     let x1 = 50, y1 = h - 65;
     let x2 = w / 2, y2 = h * 0.33;
     let cx = w / 2 - 100, cy = h * 0.15;
     let bx = (1 - t) * (1 - t) * x1 + 2 * (1 - t) * t * cx + t * t * x2;
     let by = (1 - t) * (1 - t) * y1 + 2 * (1 - t) * t * cy + t * t * y2;
     drawSmoothHeart(ctx, bx, by, 13, "#ff1361", Math.sin(frame * 0.07 + i) * 0.4);
-
-    // Right arc
     x1 = w - 50;
     x2 = w / 2;
     cx = w / 2 + 100;
@@ -169,16 +168,11 @@ function heartArcScene(ctx, w, h, frame) {
   }
 }
 
-// --- Heart Shape Scene ---
+// --- HEART SHAPE SCENE ---
 function heartShapeScene(ctx, w, h, frame) {
-  // Draw stars
   drawStars(ctx, heartShapeScene.stars, w, h);
-
-  // Characters (sitting)
   drawCharacter(ctx, 60, h - 65, 'right', true);
   drawCharacter(ctx, w - 60, h - 65, 'left', true);
-
-  // "Te amo" text
   ctx.save();
   ctx.font = "bold 44px Arial Rounded MT Bold, Arial, sans-serif";
   ctx.fillStyle = "#ff6ec7";
@@ -187,8 +181,6 @@ function heartShapeScene(ctx, w, h, frame) {
   ctx.shadowBlur = 16;
   ctx.fillText("Te amo", w / 2, h * 0.18);
   ctx.restore();
-
-  // Heart shape made from hearts
   let n = 38;
   let cx = w / 2, cy = h * 0.36, r = 83;
   for (let i = 0; i < n; i++) {
@@ -200,7 +192,7 @@ function heartShapeScene(ctx, w, h, frame) {
   }
 }
 
-// --- Scene Switcher ---
+// --- SCENE SWITCHER ---
 function runAnimation() {
   const canvas = document.getElementById("surprise-canvas");
   const w = canvas.width = window.innerWidth;
@@ -209,8 +201,7 @@ function runAnimation() {
   heartShapeScene.stars = heartArcScene.stars;
   let frame = 0;
   let scene = 0;
-  let switchTime = 220; // frames before switching to heart shape
-
+  let switchTime = 220;
   function draw() {
     if (scene === 0) {
       heartArcScene(canvas.getContext('2d'), w, h, frame);
@@ -224,7 +215,7 @@ function runAnimation() {
   draw();
 }
 
-// --- Button Logic ---
+// --- BUTTON LOGIC ---
 window.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById('center-btn');
   const canvas = document.getElementById('surprise-canvas');
