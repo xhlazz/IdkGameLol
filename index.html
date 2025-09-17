@@ -22,50 +22,19 @@
     }
     canvas { display:block; position:absolute; left:0; top:0; width:100vw; height:100vh; }
     #stars-bg { z-index:0; pointer-events:none; }
-    #surprise-canvas { z-index:1; pointer-events:none; display:none; }
-    #center-btn {
-      position: absolute;
-      left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      z-index:2;
-      background:#fff;
-      color:var(--accent);
-      padding:14px 28px;
-      font-size:1.9rem;
-      border-radius:12px;
-      border:0;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 18px #ff6ec7;
-      cursor:pointer;
-      font-weight:700;
-      transition:transform .12s ease, opacity .45s ease;
-    }
-    #center-btn:active{ transform:translate(-50%,-50%) scale(.98); }
-    /* small hint text */
-    #hint{
-      position:absolute; left:50%; top:calc(50% + 78px); transform:translateX(-50%);
-      color:#ffd3ea; font-size:0.9rem; z-index:2; opacity:0.9;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
+    #surprise-canvas { z-index:1; pointer-events:none; display:block; }
   </style>
 </head>
 <body>
   <canvas id="stars-bg"></canvas>
-  <button id="center-btn">Click Para Una Sorpresa</button>
-  <div id="hint">¡Los disparos son adorables! Espera ~5 segundos</div>
   <canvas id="surprise-canvas"></canvas>
 
   <script>
   (function(){
-    // Utilities
-    const $ = (id)=>document.getElementById(id);
-
-    // Canvases
-    const starsCanvas = $('stars-bg');
+    const starsCanvas = document.getElementById('stars-bg');
     const starsCtx = starsCanvas.getContext('2d');
-    const canvas = $('surprise-canvas');
+    const canvas = document.getElementById('surprise-canvas');
     const ctx = canvas.getContext('2d');
-    const btn = $('center-btn');
-    const hint = $('hint');
 
     function resize(){
       starsCanvas.width = window.innerWidth;
@@ -76,7 +45,7 @@
     window.addEventListener('resize', resize);
     resize();
 
-    // Star background
+    // STAR BACKGROUND
     let stars = [];
     function initStars(){
       stars = [];
@@ -128,7 +97,6 @@
         starsCtx.fill();
         starsCtx.shadowBlur = 0;
       }
-      // shooting star
       if(shootingStar.active){
         let p = shootingStar.p;
         if(p<1){
@@ -154,14 +122,13 @@
     }
     drawStars();
 
-    // Heart outline targets (parametric smooth heart shape)
+    // HEART TARGETS
     function generateHeartTargets(w,h,count){
       const cx = w/2, cy = h*0.44;
       const scale = Math.min(w,h)/3.6;
       const pts = [];
       for(let i=0;i<count;i++){
         const t = i/(count-1);
-        // angle mapping gives nice distribution for heart outline
         const a = Math.PI*(1.12*t + 0.18);
         const px = cx + Math.sin(a)*scale*(1 - 0.22*Math.abs(t-0.5));
         const py = cy - (Math.cos(a)*scale + 38*Math.abs(t-0.5));
@@ -170,19 +137,13 @@
       return pts;
     }
 
-    // Heart object lifecycle:
-    // state: 'waiting' (not shot yet), 'flying' (shot from turret), 'picked' (levitating in middle),
-    // 'delivering' (sent to target), 'arrived' (docked at target)
+    // Heart lifecycle
     const hearts = [];
     let targets = [];
-    let animationTick = 0;
-    let totalHearts = 96;          // many hearts for smoothness
-    let shootDurationMs = 3300;    // shooting window (~3.3s)
-    let overallDurationMs = 5000;  // approx desired full animation length
+    let totalHearts = 96;
+    let shootDurationMs = 3300;
     let startAt = 0;
     let center = { x: 0, y: 0 };
-    let assemblyRotation = 0;
-    let rotating = false;
     let turretPositions = { left:{x:60,y:0}, right:{x:0,y:0} };
 
     function initHearts(){
@@ -192,12 +153,9 @@
       center.y = canvas.height*0.44;
       turretPositions.left = {x:60, y: canvas.height - 68};
       turretPositions.right = {x: canvas.width - 60, y: canvas.height - 68};
-
-      // assign each heart a target and which turret fires it (alternating)
       for(let i=0;i<totalHearts;i++){
         const tgt = targets[i];
         const fromSide = (i%2===0) ? 'left' : 'right';
-        // schedule: staggered starts across shootDurationMs
         const startMs = Math.round((i / (totalHearts-1)) * shootDurationMs);
         hearts.push({
           id:i,
@@ -206,38 +164,35 @@
           state: 'waiting',
           tStart: startMs,
           tFly: 0, tPick:0, tDeliver:0,
-          // Bezier control points for initial arc
           from: null, cp: null,
-          // dynamic position
           x: 0, y:0, scale:0.6, alpha:0,
           rot: Math.random()*Math.PI*2,
           pickedAt: null
         });
       }
     }
-
     initHearts();
 
-    // Timing helpers
     function nowMs(){ return performance.now(); }
     function easeOutCubic(t){ return 1 - Math.pow(1-t,3); }
     function easeInOutSine(t){ return 0.5 - 0.5*Math.cos(Math.PI*t); }
 
-    // Start everything
+    let animationTick = 0;
+    let last = nowMs();
+    let rotating = false, rotationStart=0, rotationDuration=900;
+    let dancing = false, danceStart=0;
+
     function start(){
       startAt = nowMs();
       initHearts();
-      assemblyRotation = 0;
       rotating = false;
       animationTick = 0;
-      btn.style.opacity = 0;
-      setTimeout(()=>btn.style.display='none', 420);
-      hint.style.opacity = 0;
-      // prepare per-heart beziers
+      dancing = false;
+      last = nowMs();
+      // prepare bezier points
       for(const h of hearts){
         const from = (h.side==='left') ? turretPositions.left : turretPositions.right;
         h.from = {x: from.x, y: from.y};
-        // cp near above middle to create pretty arcs
         const midx = (from.x + h.target.x)/2 + (h.side==='left' ? -90 : 90);
         const midy = Math.min(from.y, h.target.y) - 140 - (Math.random()*30);
         h.cp = {x: midx + (Math.random()*30-15), y: midy + (Math.random()*20-10)};
@@ -250,66 +205,42 @@
       requestAnimationFrame(loop);
     }
 
-    // Core animation loop
-    let last = nowMs();
     function loop(){
       const ms = nowMs();
       const elapsed = ms - startAt;
       const w = canvas.width, h = canvas.height;
       ctx.clearRect(0,0,w,h);
 
-      // Draw subtle vignette background (modern look)
-      // (we rely on parent background; canvas draws elements only)
-
-      // Determine phases:
-      // Phase A: shooting/flying until each heart reaches "picked" condition
-      // We will: hearts begin being shot at their tStart, fly along bezier for ~50-60% of trajectory,
-      // then 'picked' -> move to center to levitate briefly, then deliver to final target.
-
-      const nowRelative = elapsed;
-
-      // Update hearts
       let allArrived = true;
       for(const h of hearts){
-        // schedule start
-        if(nowRelative >= h.tStart && h.state === 'waiting'){
+        if(ms - startAt >= h.tStart && h.state === 'waiting'){
           h.state = 'flying';
           h.tFly = 0;
-          // small variation for speed
-          h.flyDuration = 600 + (Math.random()*240 - 120); // ms for initial arc
-          // pick up time when progress reaches pickThresholdPct
-          h.pickThreshold = 0.45 + (Math.random()*0.12 - 0.06); // around 0.45-0.57
+          h.flyDuration = 600 + (Math.random()*240 - 120);
+          h.pickThreshold = 0.45 + (Math.random()*0.12 - 0.06);
         }
         if(h.state === 'flying'){
           h.tFly += (ms - last);
           let p = Math.min(h.tFly / h.flyDuration, 1);
-          // cubic ease out for natural arc motion
           const ep = easeOutCubic(p);
-          // Quadratic Bezier formula
           const bx = (1-ep)*(1-ep)*h.from.x + 2*(1-ep)*ep*h.cp.x + ep*ep*h.target.x;
           const by = (1-ep)*(1-ep)*h.from.y + 2*(1-ep)*ep*h.cp.y + ep*ep*h.target.y;
           h.x = bx; h.y = by;
           h.scale = 0.48 + 0.5*ep;
           h.alpha = 0.25 + 0.75*ep;
           h.rot *= 0.99;
-          // cute muzzle spark: small ephemeral per-heart (we render later)
           if(p >= h.pickThreshold){
-            // switch to picked state
             h.state = 'picked';
             h.pickedAt = ms;
             h.tPick = 0;
-            // compute pickup duration
-            h.pickDuration = 260 + Math.random()*240; // ms to float to center
-            // remember current pos as pickup source
+            h.pickDuration = 260 + Math.random()*240;
             h.pickFrom = {x:h.x, y:h.y};
-            // add slight random offset around center so they levitate not perfectly stacked
             h.centerOffset = {x:(Math.random()*1-0.5)*30, y:(Math.random()*1-0.5)*18};
           }
         } else if(h.state === 'picked'){
           h.tPick += (ms - last);
           const p = Math.min(h.tPick / h.pickDuration, 1);
           const ep = easeInOutSine(p);
-          // Move to center + offset (levitation)
           const tx = center.x + h.centerOffset.x;
           const ty = center.y + h.centerOffset.y;
           h.x = h.pickFrom.x*(1-ep) + tx*ep;
@@ -318,29 +249,24 @@
           h.alpha = 0.7 + 0.3*ep;
           h.rot *= 0.98;
           if(p >= 1){
-            // pause at center a short random time before deliver
             h.state = 'holding';
             h.holdFor = 80 + Math.random()*220;
             h.holdStart = ms;
           }
         } else if(h.state === 'holding'){
-          // levitating wiggling
           const tSince = ms - h.holdStart;
-          const wobble = Math.sin(tSince*0.008 + h.id)*6;
           h.x = center.x + h.centerOffset.x + Math.sin(tSince*0.006 + h.id)*8;
-          h.y = center.y + h.centerOffset.y + Math.cos(tSince*0.005 + h.id)*6 + wobble*0.1;
+          h.y = center.y + h.centerOffset.y + Math.cos(tSince*0.005 + h.id)*6;
           if(ms - h.holdStart >= h.holdFor){
             h.state = 'delivering';
             h.tDeliver = 0;
             h.deliverDuration = 420 + Math.random()*260;
-            // to ensure final placement respects assembled rotation later, store target relative to center
             h.relTarget = { x: h.target.x - center.x, y: h.target.y - center.y };
           }
         } else if(h.state === 'delivering'){
           h.tDeliver += (ms - last);
           const p = Math.min(h.tDeliver / h.deliverDuration, 1);
           const ep = easeOutCubic(p);
-          // starting point is current x,y (near center), go to target
           const startX = center.x + h.centerOffset.x;
           const startY = center.y + h.centerOffset.y;
           h.x = startX*(1-ep) + (h.target.x)*ep;
@@ -359,72 +285,52 @@
         if(h.state !== 'arrived') allArrived = false;
       }
 
-      // cute turrets: compute phases for shooting glow and arm recoil
-      // global shooting phase while any heart is flying/picked/holding/delivering
       const anyActive = hearts.some(h=> h.state !== 'waiting' && h.state !== 'arrived');
-      const shootPhase = anyActive ? 1 : 0;
-
-      // Draw assembled hearts (we will draw delivered hearts with potential group rotation when all arrived)
-      // If rotating flag set, apply rotation transform around center
       if(hearts.every(h=>h.state==='arrived') && hearts.length>0){
-        // Begin rotation once: set rotating true if not already, and animate 360deg over time
         if(!rotating){
           rotating = true;
           rotationStart = ms;
-          rotationDuration = 900; // ms for full 360
+          rotationDuration = 900;
         }
       }
 
-      // If rotating, compute rotation angle based on elapsed of rotationDuration
       let rotationAngle = 0;
       if(rotating){
         const t = Math.min((ms - rotationStart)/rotationDuration, 1);
         rotationAngle = Math.PI*2 * easeOutCubic(t);
         if(t>=1){
-          // rotation finished -> make turrets dance
           rotating = false;
           dancing = true;
           danceStart = ms;
         }
       }
 
-      // draw hearts that are in 'delivering' or 'arrived' state differently:
-      // We'll first draw flying and picked hearts (so they appear above assembled group), then apply rotation and draw assembled (arrived) hearts as a group.
-
-      // Draw flying/picked/holding/delivering hearts (non-arrived)
+      // Draw non-arrived hearts on top
       for(const h of hearts){
         if(h.state === 'arrived') continue;
         drawEmojiHeart(ctx, h.x, h.y, 32*h.scale, h.rot, h.alpha);
-        // small muzzle spark when just launched
         if(h.state === 'flying'){
           const launchProgress = Math.min(h.tFly / h.flyDuration, 1);
           if(launchProgress < 0.12){
             drawMuzzleSpark(ctx, h.from.x, h.from.y, launchProgress);
           }
         }
-        // small pickup swirl
         if(h.state === 'picked' || h.state === 'holding'){
           drawTinyGlow(ctx, h.x, h.y, 6 + 10*Math.sin(ms*0.02 + h.id));
         }
       }
 
-      // Save and apply rotation around center
+      // Draw assembled arrived hearts as a rotating group
       ctx.save();
       ctx.translate(center.x, center.y);
       ctx.rotate(rotationAngle);
       ctx.translate(-center.x, -center.y);
-
-      // Draw assembled arrived hearts (they follow target positions, but rotated as a group)
       for(const h of hearts){
         if(h.state !== 'arrived') continue;
-        // apply the same rotation to each heart's relative coordinate
-        // but since we already rotated the canvas, just draw at h.target
         drawEmojiHeart(ctx, h.target.x, h.target.y, 34*h.scale, 0, 1, 8);
       }
-
       ctx.restore();
 
-      // Draw glowing "Te amo" text: visible once a meaningful number have arrived (we show after about 70% arrived)
       const arrivedCount = hearts.filter(h=>h.state==='arrived').length;
       if(arrivedCount >= Math.round(totalHearts*0.68)){
         ctx.save();
@@ -438,21 +344,16 @@
         ctx.restore();
       }
 
-      // Draw turrets (front)
       const frame = animationTick;
-      // if dancing triggered after rotation:
-      const dancePhase = typeof dancing !== 'undefined' && dancing ? Math.min(1, (nowMs() - danceStart) / 320) : 0;
+      const dancePhase = dancing ? Math.min(1, (nowMs() - danceStart) / 320) : 0;
       drawTurret(ctx, turretPositions.left.x, turretPositions.left.y, 'right', anyActive, dancePhase, frame);
       drawTurret(ctx, turretPositions.right.x, turretPositions.right.y, 'left', anyActive, dancePhase, frame);
 
       animationTick++;
       last = ms;
-
-      // Stop condition: after dance for some time, we can optionally loop or stop. We'll keep animating for lively scene.
       requestAnimationFrame(loop);
     }
 
-    // tiny helper draws
     function drawEmojiHeart(ctx,x,y,size,rot,alpha,glow=0){
       ctx.save();
       ctx.translate(x, y);
@@ -490,7 +391,6 @@
       ctx.restore();
     }
 
-    // turret drawing: a bit more stylized/cute and with small arm recoil when shooting
     function drawTurret(ctx,x,y,facing,shooting,dancing,frame){
       ctx.save();
       ctx.translate(x,y);
@@ -502,7 +402,6 @@
       }
       ctx.scale(facing==='left' ? -1 : 1, 1);
 
-      // base glow if shooting
       if(shooting){
         ctx.save();
         ctx.globalAlpha = 0.22;
@@ -515,21 +414,18 @@
         ctx.restore();
       }
 
-      // Body
       ctx.beginPath();
       ctx.fillStyle = '#fff';
       ctx.arc(0,0,20,0,Math.PI*2);
       ctx.fill();
-      // eyes
+
       ctx.fillStyle = '#222';
       ctx.beginPath(); ctx.arc(-7,-3,3.2,0,Math.PI*2); ctx.fill();
       ctx.beginPath(); ctx.arc(7,-3,3.2,0,Math.PI*2); ctx.fill();
-      // smile
+
       ctx.beginPath(); ctx.arc(0,8,7,Math.PI*0.14,Math.PI*0.86); ctx.lineWidth=2; ctx.strokeStyle='#222'; ctx.stroke();
 
-      // arms (shooting recoil)
       ctx.save();
-      // shooting arm angle oscillates when shooting
       const base = shooting ? (Math.sin(frame*0.5)*0.18 + 0.9) : 0.1;
       ctx.rotate(-base);
       ctx.beginPath();
@@ -552,7 +448,6 @@
       ctx.stroke();
       ctx.restore();
 
-      // saucer
       ctx.save();
       ctx.translate(0,26);
       ctx.beginPath();
@@ -567,24 +462,11 @@
       ctx.restore();
     }
 
-    // Button click wiring
-    btn.addEventListener('click', ()=>{
-      start();
-      // hide hint
-      hint.style.opacity = 0;
+    // Auto-start when page loads
+    window.addEventListener('load', ()=>{
+      // slight delay so layout stabilizes
+      setTimeout(()=>{ start(); }, 300);
     });
-
-    // Start a small idle hint animation for the button
-    (function pulseBtn(){
-      let dir = 1;
-      setInterval(()=>{
-        if(btn.style.display === 'none') return;
-        btn.style.transform = `translate(-50%,-50%) scale(${1 + 0.02 * Math.sin(performance.now()*0.003)})`;
-      }, 80);
-    })();
-
-    // Expose for debugging (optional)
-    window._HEARTS = hearts;
 
   })();
   </script>
