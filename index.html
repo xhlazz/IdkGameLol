@@ -1,592 +1,372 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Te Amo Sorpresa — Animated Hearts</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Te Amo Sorpresa</title>
   <style>
-    :root{
-      --bg1:#4a1b5f;
-      --bg2:#0e1c39;
-      --accent:#ff4f7a;
-      --pink:#fa4f86;
-    }
-    html,body{
-      height:100%;
-      margin:0;
-      background: radial-gradient(ellipse at bottom, var(--bg1) 0%, var(--bg2) 100%);
-      font-family: "Arial Rounded MT Bold", Arial, system-ui, -apple-system, "Segoe UI", Roboto;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      overflow:hidden;
-    }
-    canvas { display:block; position:absolute; left:0; top:0; width:100vw; height:100vh; }
-    #stars-bg { z-index:0; pointer-events:none; }
-    #surprise-canvas { z-index:1; pointer-events:none; display:none; }
+    html, body {margin:0; padding:0; width:100vw; height:100vh; overflow:hidden;
+      background:radial-gradient(ellipse at bottom, #4a1b5f 0%, #0e1c39 100%);
+      font-family:'Arial Rounded MT Bold', Arial, sans-serif;}
+    #stars-bg, #surprise-canvas {
+      position: absolute; left:0; top:0; width:100vw; height:100vh; z-index:0; pointer-events:none;}
     #center-btn {
-      position: absolute;
-      left:50%; top:50%;
-      transform:translate(-50%,-50%);
-      z-index:2;
-      background:#fff;
-      color:var(--accent);
-      padding:14px 28px;
-      font-size:1.9rem;
-      border-radius:12px;
-      border:0;
-      box-shadow: 0 10px 40px rgba(0,0,0,0.25), 0 0 18px #ff6ec7;
-      cursor:pointer;
-      font-weight:700;
-      transition:transform .12s ease, opacity .45s ease;
-    }
-    #center-btn:active{ transform:translate(-50%,-50%) scale(.98); }
-    /* small hint text */
-    #hint{
-      position:absolute; left:50%; top:calc(50% + 78px); transform:translateX(-50%);
-      color:#ffd3ea; font-size:0.9rem; z-index:2; opacity:0.9;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.5);
-    }
+      position:absolute; left:50%; top:50%; transform:translate(-50%, -50%);
+      background:#fff; color:#d9296a; border:none; padding:1em 2.2em; font-size:2em; font-weight:bold;
+      letter-spacing:0.06em; border-radius:1em; box-shadow:0 0 38px #fff7, 0 0 18px #ff6ec7;
+      z-index:2; cursor:pointer; transition:opacity 0.5s;}
+    #center-btn:active {background:#ffeaff; box-shadow:0 0 20px #ff6ec7;}
+    #surprise-canvas {z-index:1; display:none;}
   </style>
 </head>
 <body>
   <canvas id="stars-bg"></canvas>
   <button id="center-btn">Click Para Una Sorpresa</button>
-  <div id="hint">¡Los disparos son adorables! Espera ~5 segundos</div>
   <canvas id="surprise-canvas"></canvas>
-
   <script>
-  (function(){
-    // Utilities
-    const $ = (id)=>document.getElementById(id);
-
-    // Canvases
-    const starsCanvas = $('stars-bg');
+    // --- STAR BACKGROUND ---
+    const starsCanvas = document.getElementById('stars-bg');
     const starsCtx = starsCanvas.getContext('2d');
-    const canvas = $('surprise-canvas');
-    const ctx = canvas.getContext('2d');
-    const btn = $('center-btn');
-    const hint = $('hint');
-
-    function resize(){
+    let stars = [], shootingStar = null;
+    function resizeStarsCanvas() {
       starsCanvas.width = window.innerWidth;
       starsCanvas.height = window.innerHeight;
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
     }
-    window.addEventListener('resize', resize);
-    resize();
+    resizeStarsCanvas(); window.addEventListener('resize', resizeStarsCanvas);
 
-    // Star background
-    let stars = [];
-    function initStars(){
+    function createStars() {
       stars = [];
-      const w = starsCanvas.width, h = starsCanvas.height;
-      const layers = [0.3,0.7,1];
-      const counts = [60, 36, 20];
-      const colors = ['#fff','#aef','#ffe6f0'];
-      for(let l=0;l<layers.length;l++){
-        for(let i=0;i<counts[l];i++){
+      let layers = [0.3, 0.7, 1];
+      let colors = ['#fff', '#aef', '#fee'];
+      for (let l = 0; l < layers.length; l++) {
+        for (let i = 0; i < 50 + l * 20; i++) {
           stars.push({
-            x: Math.random()*w,
-            y: Math.random()*h,
-            r: Math.random()*(1.4 + l*0.6)+0.6,
-            a: Math.random()*Math.PI*2,
-            tw: Math.random()*0.8+0.2,
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: Math.random() * 1.4 + 0.8 + l * 0.4,
+            a: Math.random() * Math.PI * 2,
+            tw: Math.random() * 0.9 + 0.5,
             layer: layers[l],
             color: colors[l]
           });
         }
       }
+      shootingStar = {
+        progress: 0,
+        x0: Math.random() * starsCanvas.width * 0.5 + starsCanvas.width * 0.1,
+        y0: Math.random() * starsCanvas.height * 0.2 + starsCanvas.height * 0.1,
+        dx: Math.random() * 90 + 80,
+        dy: Math.random() * 35 + 15
+      };
     }
-    initStars();
+    createStars();
+    window.addEventListener('resize', createStars);
 
-    let shootingStar = { active:false, p:0, x0:0, y0:0, dx:0, dy:0 };
-    function maybeSpawnShootingStar(){
-      if(!shootingStar.active && Math.random()<0.006){
-        shootingStar.active = true;
-        shootingStar.p = 0;
-        shootingStar.x0 = Math.random()*starsCanvas.width*0.4 + starsCanvas.width*0.05;
-        shootingStar.y0 = Math.random()*starsCanvas.height*0.25 + starsCanvas.height*0.03;
-        shootingStar.dx = Math.random()*140 + 80;
-        shootingStar.dy = Math.random()*50 + 30;
-      }
-    }
-
-    function drawStars(){
-      const w=starsCanvas.width, h=starsCanvas.height;
-      starsCtx.clearRect(0,0,w,h);
-      for(const s of stars){
-        s.a += 0.012 + s.tw*0.01;
-        const alpha = 0.55 + Math.sin(s.a)*0.35;
-        const px = s.x + Math.sin(s.a*0.13)*6*s.layer;
-        const py = s.y + Math.cos(s.a*0.16)*4*s.layer;
+    function drawStars() {
+      starsCtx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+      for (const star of stars) {
+        star.a += 0.016 + star.tw * 0.011;
+        let alpha = 0.55 + Math.sin(star.a) * 0.35;
+        let px = star.x + Math.sin(star.a * 0.13) * 7 * star.layer;
+        let py = star.y + Math.cos(star.a * 0.17) * 4.5 * star.layer;
         starsCtx.beginPath();
-        starsCtx.arc(px,py,s.r,0,Math.PI*2);
-        starsCtx.fillStyle = `rgba(${s.color === '#fff' ? '255,255,255' : s.color === '#aef' ? '170,238,255' : '255,230,240'},${alpha})`;
-        starsCtx.shadowColor = s.color;
-        starsCtx.shadowBlur = 8*s.layer;
+        starsCtx.arc(px, py, star.r, 0, Math.PI * 2);
+        starsCtx.fillStyle = `rgba(${star.color === '#fff' ? '255,255,255' : star.color === '#aef' ? '170,238,255' : '255,238,238'},${alpha})`;
+        starsCtx.shadowColor = star.color;
+        starsCtx.shadowBlur = 12 * star.layer;
         starsCtx.fill();
         starsCtx.shadowBlur = 0;
       }
-      // shooting star
-      if(shootingStar.active){
-        let p = shootingStar.p;
-        if(p<1){
-          const x = shootingStar.x0 + shootingStar.dx*p;
-          const y = shootingStar.y0 + shootingStar.dy*p;
+      // Shooting star
+      if (shootingStar) {
+        let p = shootingStar.progress;
+        if (p < 1) {
+          let x = shootingStar.x0 + shootingStar.dx * p;
+          let y = shootingStar.y0 + shootingStar.dy * p;
           starsCtx.save();
-          starsCtx.globalAlpha = 0.75;
+          starsCtx.globalAlpha = 0.7;
           starsCtx.strokeStyle = "#fff";
-          starsCtx.lineWidth = 2.6;
+          starsCtx.lineWidth = 2.4;
           starsCtx.beginPath();
           starsCtx.moveTo(x-shootingStar.dx*0.22, y-shootingStar.dy*0.22);
-          starsCtx.lineTo(x,y);
+          starsCtx.lineTo(x, y);
           starsCtx.stroke();
           starsCtx.restore();
-          shootingStar.p += 0.01 + Math.random()*0.01;
-        } else {
-          shootingStar.active=false;
+          shootingStar.progress += 0.009;
+          if (shootingStar.progress > 1.05) shootingStar = null;
+        } else if (Math.random() < 0.002) {
+          createStars();
         }
-      } else {
-        maybeSpawnShootingStar();
       }
       requestAnimationFrame(drawStars);
     }
     drawStars();
 
-    // Heart outline targets (parametric smooth heart shape)
-    function generateHeartTargets(w,h,count){
-      const cx = w/2, cy = h*0.44;
-      const scale = Math.min(w,h)/3.6;
-      const pts = [];
-      for(let i=0;i<count;i++){
-        const t = i/(count-1);
-        // angle mapping gives nice distribution for heart outline
-        const a = Math.PI*(1.12*t + 0.18);
-        const px = cx + Math.sin(a)*scale*(1 - 0.22*Math.abs(t-0.5));
-        const py = cy - (Math.cos(a)*scale + 38*Math.abs(t-0.5));
-        pts.push({x:px, y:py});
+    // --- HEART SHAPE (Perfect outline using parametric) ---
+    function getHeartOutline(w, h, n) {
+      let cx = w/2, cy = h*0.45, r = Math.min(w,h)/3.2;
+      let coords = [];
+      for (let i = 0; i < n; i++) {
+        let theta = Math.PI * 2 * i / n;
+        // Cardioid parametric for perfect heart
+        let px = cx + r * 16 * Math.pow(Math.sin(theta),3) / 17;
+        let py = cy - r * (13 * Math.cos(theta) - 5 * Math.cos(2*theta) - 2 * Math.cos(3*theta) - Math.cos(4*theta)) / 17;
+        coords.push({x:px, y:py, theta});
       }
-      return pts;
+      return coords;
     }
 
-    // Heart object lifecycle:
-    // state: 'waiting' (not shot yet), 'flying' (shot from turret), 'picked' (levitating in middle),
-    // 'delivering' (sent to target), 'arrived' (docked at target)
-    const hearts = [];
-    let targets = [];
-    let animationTick = 0;
-    let totalHearts = 96;          // many hearts for smoothness
-    let shootDurationMs = 3300;    // shooting window (~3.3s)
-    let overallDurationMs = 5000;  // approx desired full animation length
-    let startAt = 0;
-    let center = { x: 0, y: 0 };
-    let assemblyRotation = 0;
-    let rotating = false;
-    let turretPositions = { left:{x:60,y:0}, right:{x:0,y:0} };
+    // --- CUTE TURRET DRAW ---
+    function drawTurret(ctx, x, y, facing, shootAnim, dance, frame) {
+      ctx.save();
+      ctx.translate(x, y);
+      // Dance: bounce and wiggle
+      if (dance) {
+        ctx.translate(0, Math.sin(frame*0.20 + (facing==='left'?1:0))*10);
+        ctx.rotate(Math.sin(frame*0.14+(facing==='left'?1.7:0))*0.19);
+      }
+      ctx.scale(facing==='left'?-1:1, 1);
 
-    function initHearts(){
-      hearts.length = 0;
-      targets = generateHeartTargets(canvas.width, canvas.height, totalHearts);
-      center.x = canvas.width/2;
-      center.y = canvas.height*0.44;
-      turretPositions.left = {x:60, y: canvas.height - 68};
-      turretPositions.right = {x: canvas.width - 60, y: canvas.height - 68};
+      // Glow cheeks
+      ctx.save();
+      ctx.globalAlpha = 0.30 + shootAnim*0.4;
+      ctx.shadowColor = "#ff69b4";
+      ctx.shadowBlur = 16 + shootAnim*15;
+      ctx.beginPath();
+      ctx.arc(-8,7,6,0,Math.PI*2);
+      ctx.arc(8,7,6,0,Math.PI*2);
+      ctx.fillStyle = "#ff69b4";
+      ctx.fill();
+      ctx.restore();
 
-      // assign each heart a target and which turret fires it (alternating)
-      for(let i=0;i<totalHearts;i++){
-        const tgt = targets[i];
-        const fromSide = (i%2===0) ? 'left' : 'right';
-        // schedule: staggered starts across shootDurationMs
-        const startMs = Math.round((i / (totalHearts-1)) * shootDurationMs);
-        hearts.push({
-          id:i,
-          target: {x: tgt.x, y: tgt.y},
-          side: fromSide,
-          state: 'waiting',
-          tStart: startMs,
-          tFly: 0, tPick:0, tDeliver:0,
-          // Bezier control points for initial arc
-          from: null, cp: null,
-          // dynamic position
-          x: 0, y:0, scale:0.6, alpha:0,
-          rot: Math.random()*Math.PI*2,
-          pickedAt: null
+      // Body
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI*2);
+      ctx.fillStyle = "#fff";
+      ctx.shadowColor = "#666";
+      ctx.shadowBlur = 8;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Eyes (big, bright)
+      ctx.beginPath(); ctx.arc(-7,-3,3.6,0,Math.PI*2);
+      ctx.arc(7,-3,3.6,0,Math.PI*2);
+      ctx.fillStyle = "#222";
+      ctx.fill();
+
+      // Smile (big if dance)
+      ctx.beginPath();
+      let smileY = dance ? 13 : 8;
+      let smileR = dance ? 9.5 : 7.5;
+      ctx.arc(0, smileY, smileR, Math.PI*0.14,Math.PI*0.86);
+      ctx.strokeStyle = "#222";
+      ctx.lineWidth = 2.3;
+      ctx.stroke();
+
+      // Arms: recoil and glow when shooting
+      ctx.save();
+      let armsUp = shootAnim ? Math.sin(frame*0.39)*0.38+0.77*shootAnim : (dance?0.4:0.08);
+      ctx.rotate(-armsUp);
+      ctx.beginPath();
+      ctx.arc(-15,10,7,Math.PI*0.4,Math.PI*1.6);
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = "#fff";
+      ctx.stroke();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = "#222";
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.save();
+      ctx.rotate(armsUp);
+      ctx.beginPath();
+      ctx.arc(15,10,7,Math.PI*1.6,Math.PI*0.4,true);
+      ctx.lineWidth = 7;
+      ctx.strokeStyle = "#fff";
+      ctx.stroke();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = "#222";
+      ctx.stroke();
+      ctx.restore();
+
+      // Saucer
+      ctx.save();
+      ctx.translate(0,24);
+      ctx.beginPath();
+      ctx.ellipse(0,0,22,8,0,0,Math.PI*2);
+      ctx.fillStyle = "#eee";
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(0,0,22,8,0,0,Math.PI*2);
+      ctx.strokeStyle = "#999";
+      ctx.lineWidth = 2.8;
+      ctx.stroke();
+      ctx.restore();
+
+      // Shooting Glow
+      if (shootAnim>0.08 && frame%20<10) {
+        ctx.save();
+        ctx.globalAlpha = 0.22+shootAnim*0.3;
+        ctx.shadowColor = "#ff1361";
+        ctx.shadowBlur = 32*shootAnim;
+        ctx.beginPath();
+        ctx.arc(0,0,27,0,Math.PI*2);
+        ctx.fillStyle = "#ff1361";
+        ctx.fill();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    // --- HEART EMOJI ---
+    function drawEmojiHeart(ctx,x,y,size,rot,alpha,glow=0) {
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.font = `bold ${size}px serif`;
+      ctx.translate(x,y);
+      ctx.rotate(rot);
+      ctx.shadowColor = "#ff1361";
+      ctx.shadowBlur = size*0.21+glow;
+      ctx.fillText("❤️",0,0);
+      ctx.restore();
+    }
+
+    // --- HEART ANIMATION STAGES ---
+    // STAGE 0: Turrets shoot hearts to center
+    // STAGE 1: Hearts float and wiggle in center
+    // STAGE 2: Levitate hearts to heart outline
+    // STAGE 3: Heart outline spins 360° and "Te amo" appears
+    let flyingHearts = [], animationFrame = 0, stage = 0;
+    let HEARTS_COUNT = 64;
+    let heartOutline = [];
+    let rotateHeart = 0;
+    let STAGE0_FRAMES = 55;
+    let STAGE1_FRAMES = 55;
+    let STAGE2_FRAMES = 60;
+    let STAGE3_FRAMES = 44;
+
+    function setupHeartAnimation() {
+      animationFrame = 0; stage = 0; rotateHeart = 0;
+      flyingHearts = [];
+      const w = canvas.width, h = canvas.height;
+      heartOutline = getHeartOutline(w,h,HEARTS_COUNT);
+
+      // Launch from turrets to center
+      let cx=w/2, cy=h*0.41;
+      for (let i=0;i<HEARTS_COUNT;i++) {
+        let t = i/(HEARTS_COUNT-1);
+        let fromX = t<0.5?60:w-60;
+        let fromY = h-65;
+        let angle = Math.random()*Math.PI/3 - Math.PI/6; // random spread
+        let midX = cx + Math.cos(angle)*60;
+        let midY = cy + Math.sin(angle)*60;
+        flyingHearts.push({
+          stage:0,
+          fromX, fromY, midX, midY, cx, cy,
+          x:fromX, y:fromY,
+          scale:0.7, alpha:0.1, rot:Math.random()*2*Math.PI,
+          outlineX:heartOutline[i].x, outlineY:heartOutline[i].y, outlineTheta:heartOutline[i].theta,
+          levitateY: cy - Math.random()*40,
+          levitateX: cx + Math.sin(Math.PI*2*i/HEARTS_COUNT)*18,
+          levitateWiggle: Math.random()*Math.PI*2
         });
       }
     }
 
-    initHearts();
+    // --- MAIN ANIMATION LOOP ---
+    function drawScene() {
+      ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    // Timing helpers
-    function nowMs(){ return performance.now(); }
-    function easeOutCubic(t){ return 1 - Math.pow(1-t,3); }
-    function easeInOutSine(t){ return 0.5 - 0.5*Math.cos(Math.PI*t); }
+      // Turret animation
+      let shootAnim = 0, danceAnim = 0;
+      if (stage===0 && animationFrame<STAGE0_FRAMES) shootAnim = 1;
+      if (stage===3) danceAnim = 1;
 
-    // Start everything
-    function start(){
-      startAt = nowMs();
-      initHearts();
-      assemblyRotation = 0;
-      rotating = false;
-      animationTick = 0;
+      // Draw turrets
+      drawTurret(ctx,60,canvas.height-65,'right',shootAnim,danceAnim,animationFrame);
+      drawTurret(ctx,canvas.width-60,canvas.height-65,'left',shootAnim,danceAnim,animationFrame);
+
+      // Hearts logic by stage
+      let cx = canvas.width/2, cy = canvas.height*0.41;
+      for (let i=0;i<HEARTS_COUNT;i++) {
+        let heart = flyingHearts[i];
+        let t = i/(HEARTS_COUNT-1);
+
+        // STAGE 0: fly from turret to center
+        if (stage===0) {
+          let ft = Math.min(1, animationFrame/STAGE0_FRAMES);
+          let stagger = Math.max(0, (animationFrame - t*10)/STAGE0_FRAMES);
+          let prog = Math.min(1, stagger);
+          // Quadratic curve
+          heart.x = (1-prog)*(1-prog)*heart.fromX + 2*(1-prog)*prog*heart.midX + prog*prog*heart.cx;
+          heart.y = (1-prog)*(1-prog)*heart.fromY + 2*(1-prog)*prog*heart.midY + prog*prog*heart.cy;
+          heart.scale = 0.7+0.3*prog;
+          heart.alpha = 0.1+0.9*prog;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.1+Math.PI*t;
+        }
+        // STAGE 1: levitate in center
+        else if (stage===1) {
+          let floatProg = Math.min(1, animationFrame/STAGE1_FRAMES);
+          heart.x = heart.cx + Math.sin(animationFrame*0.14+i)*12;
+          heart.y = heart.levitateY + Math.sin(animationFrame*0.18+i+heart.levitateWiggle)*11;
+          heart.scale = 0.93+0.15*Math.sin(animationFrame*0.13+i);
+          heart.alpha = 1;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.19;
+        }
+        // STAGE 2: fly from center to outline
+        else if (stage===2) {
+          let prog = Math.min(1,animationFrame/STAGE2_FRAMES);
+          heart.x = (1-prog)*(1-prog)*heart.cx + 2*(1-prog)*prog*heart.levitateX + prog*prog*heart.outlineX;
+          heart.y = (1-prog)*(1-prog)*heart.cy + 2*(1-prog)*prog*heart.levitateY + prog*prog*heart.outlineY;
+          heart.scale = 0.95+0.17*prog;
+          heart.alpha = 1;
+          heart.rot = Math.sin(animationFrame*0.13+i)*0.19*(1-prog);
+        }
+        // STAGE 3: heart rotates
+        else if (stage===3) {
+          let spin = rotateHeart;
+          let tx = heartOutline[i].x-cx, ty = heartOutline[i].y-cy;
+          let rx = tx*Math.cos(spin)-ty*Math.sin(spin);
+          let ry = tx*Math.sin(spin)+ty*Math.cos(spin);
+          heart.x = cx+rx; heart.y = cy+ry;
+          heart.scale = 1.08+0.12*Math.sin(animationFrame*0.11+i);
+          heart.alpha = 1;
+          heart.rot = spin + Math.PI*t;
+        }
+        drawEmojiHeart(ctx,heart.x,heart.y,34*heart.scale,heart.rot,heart.alpha,stage>=2?12:0);
+      }
+
+      // Text appears after heart spins
+      if (stage===3 && rotateHeart>=2*Math.PI) {
+        ctx.save();
+        ctx.font = "bold 63px Arial Rounded MT Bold, Arial, sans-serif";
+        ctx.fillStyle = "#fa4f86";
+        ctx.textAlign = "center";
+        ctx.shadowColor = "#ff1361";
+        ctx.shadowBlur = 34;
+        ctx.globalAlpha = 1;
+        ctx.fillText("Te amo", canvas.width/2, canvas.height*0.18);
+        ctx.restore();
+      }
+
+      // Stage transitions
+      if (stage===0 && animationFrame>STAGE0_FRAMES+12) {stage=1;animationFrame=0;}
+      else if (stage===1 && animationFrame>STAGE1_FRAMES+12) {stage=2;animationFrame=0;}
+      else if (stage===2 && animationFrame>STAGE2_FRAMES+8) {stage=3;animationFrame=0;}
+      else if (stage===3 && rotateHeart<2*Math.PI) {rotateHeart+=Math.PI/(STAGE3_FRAMES*0.6);}
+
+      animationFrame++;
+      requestAnimationFrame(drawScene);
+    }
+
+    const btn = document.getElementById('center-btn');
+    btn.addEventListener("click", () => {
       btn.style.opacity = 0;
-      setTimeout(()=>btn.style.display='none', 420);
-      hint.style.opacity = 0;
-      // prepare per-heart beziers
-      for(const h of hearts){
-        const from = (h.side==='left') ? turretPositions.left : turretPositions.right;
-        h.from = {x: from.x, y: from.y};
-        // cp near above middle to create pretty arcs
-        const midx = (from.x + h.target.x)/2 + (h.side==='left' ? -90 : 90);
-        const midy = Math.min(from.y, h.target.y) - 140 - (Math.random()*30);
-        h.cp = {x: midx + (Math.random()*30-15), y: midy + (Math.random()*20-10)};
-        h.state='waiting';
-        h.tFly = 0; h.tPick=0; h.tDeliver=0;
-        h.x = from.x; h.y = from.y;
-        h.scale = 0.5 + Math.random()*0.2;
-        h.alpha = 0.0;
-      }
-      requestAnimationFrame(loop);
-    }
-
-    // Core animation loop
-    let last = nowMs();
-    function loop(){
-      const ms = nowMs();
-      const elapsed = ms - startAt;
-      const w = canvas.width, h = canvas.height;
-      ctx.clearRect(0,0,w,h);
-
-      // Draw subtle vignette background (modern look)
-      // (we rely on parent background; canvas draws elements only)
-
-      // Determine phases:
-      // Phase A: shooting/flying until each heart reaches "picked" condition
-      // We will: hearts begin being shot at their tStart, fly along bezier for ~50-60% of trajectory,
-      // then 'picked' -> move to center to levitate briefly, then deliver to final target.
-
-      const nowRelative = elapsed;
-
-      // Update hearts
-      let allArrived = true;
-      for(const h of hearts){
-        // schedule start
-        if(nowRelative >= h.tStart && h.state === 'waiting'){
-          h.state = 'flying';
-          h.tFly = 0;
-          // small variation for speed
-          h.flyDuration = 600 + (Math.random()*240 - 120); // ms for initial arc
-          // pick up time when progress reaches pickThresholdPct
-          h.pickThreshold = 0.45 + (Math.random()*0.12 - 0.06); // around 0.45-0.57
-        }
-        if(h.state === 'flying'){
-          h.tFly += (ms - last);
-          let p = Math.min(h.tFly / h.flyDuration, 1);
-          // cubic ease out for natural arc motion
-          const ep = easeOutCubic(p);
-          // Quadratic Bezier formula
-          const bx = (1-ep)*(1-ep)*h.from.x + 2*(1-ep)*ep*h.cp.x + ep*ep*h.target.x;
-          const by = (1-ep)*(1-ep)*h.from.y + 2*(1-ep)*ep*h.cp.y + ep*ep*h.target.y;
-          h.x = bx; h.y = by;
-          h.scale = 0.48 + 0.5*ep;
-          h.alpha = 0.25 + 0.75*ep;
-          h.rot *= 0.99;
-          // cute muzzle spark: small ephemeral per-heart (we render later)
-          if(p >= h.pickThreshold){
-            // switch to picked state
-            h.state = 'picked';
-            h.pickedAt = ms;
-            h.tPick = 0;
-            // compute pickup duration
-            h.pickDuration = 260 + Math.random()*240; // ms to float to center
-            // remember current pos as pickup source
-            h.pickFrom = {x:h.x, y:h.y};
-            // add slight random offset around center so they levitate not perfectly stacked
-            h.centerOffset = {x:(Math.random()*1-0.5)*30, y:(Math.random()*1-0.5)*18};
-          }
-        } else if(h.state === 'picked'){
-          h.tPick += (ms - last);
-          const p = Math.min(h.tPick / h.pickDuration, 1);
-          const ep = easeInOutSine(p);
-          // Move to center + offset (levitation)
-          const tx = center.x + h.centerOffset.x;
-          const ty = center.y + h.centerOffset.y;
-          h.x = h.pickFrom.x*(1-ep) + tx*ep;
-          h.y = h.pickFrom.y*(1-ep) + ty*ep;
-          h.scale = 0.7 + 0.3*ep;
-          h.alpha = 0.7 + 0.3*ep;
-          h.rot *= 0.98;
-          if(p >= 1){
-            // pause at center a short random time before deliver
-            h.state = 'holding';
-            h.holdFor = 80 + Math.random()*220;
-            h.holdStart = ms;
-          }
-        } else if(h.state === 'holding'){
-          // levitating wiggling
-          const tSince = ms - h.holdStart;
-          const wobble = Math.sin(tSince*0.008 + h.id)*6;
-          h.x = center.x + h.centerOffset.x + Math.sin(tSince*0.006 + h.id)*8;
-          h.y = center.y + h.centerOffset.y + Math.cos(tSince*0.005 + h.id)*6 + wobble*0.1;
-          if(ms - h.holdStart >= h.holdFor){
-            h.state = 'delivering';
-            h.tDeliver = 0;
-            h.deliverDuration = 420 + Math.random()*260;
-            // to ensure final placement respects assembled rotation later, store target relative to center
-            h.relTarget = { x: h.target.x - center.x, y: h.target.y - center.y };
-          }
-        } else if(h.state === 'delivering'){
-          h.tDeliver += (ms - last);
-          const p = Math.min(h.tDeliver / h.deliverDuration, 1);
-          const ep = easeOutCubic(p);
-          // starting point is current x,y (near center), go to target
-          const startX = center.x + h.centerOffset.x;
-          const startY = center.y + h.centerOffset.y;
-          h.x = startX*(1-ep) + (h.target.x)*ep;
-          h.y = startY*(1-ep) + (h.target.y)*ep;
-          h.scale = 0.85 + 0.15*ep;
-          h.alpha = 0.9;
-          h.rot = (1-p)*h.rot*0.5;
-          if(p>=1){
-            h.state = 'arrived';
-            h.arrivedAt = ms;
-            h.x = h.target.x; h.y = h.target.y;
-            h.scale = 1;
-            h.alpha = 1;
-          }
-        }
-        if(h.state !== 'arrived') allArrived = false;
-      }
-
-      // cute turrets: compute phases for shooting glow and arm recoil
-      // global shooting phase while any heart is flying/picked/holding/delivering
-      const anyActive = hearts.some(h=> h.state !== 'waiting' && h.state !== 'arrived');
-      const shootPhase = anyActive ? 1 : 0;
-
-      // Draw assembled hearts (we will draw delivered hearts with potential group rotation when all arrived)
-      // If rotating flag set, apply rotation transform around center
-      if(hearts.every(h=>h.state==='arrived') && hearts.length>0){
-        // Begin rotation once: set rotating true if not already, and animate 360deg over time
-        if(!rotating){
-          rotating = true;
-          rotationStart = ms;
-          rotationDuration = 900; // ms for full 360
-        }
-      }
-
-      // If rotating, compute rotation angle based on elapsed of rotationDuration
-      let rotationAngle = 0;
-      if(rotating){
-        const t = Math.min((ms - rotationStart)/rotationDuration, 1);
-        rotationAngle = Math.PI*2 * easeOutCubic(t);
-        if(t>=1){
-          // rotation finished -> make turrets dance
-          rotating = false;
-          dancing = true;
-          danceStart = ms;
-        }
-      }
-
-      // draw hearts that are in 'delivering' or 'arrived' state differently:
-      // We'll first draw flying and picked hearts (so they appear above assembled group), then apply rotation and draw assembled (arrived) hearts as a group.
-
-      // Draw flying/picked/holding/delivering hearts (non-arrived)
-      for(const h of hearts){
-        if(h.state === 'arrived') continue;
-        drawEmojiHeart(ctx, h.x, h.y, 32*h.scale, h.rot, h.alpha);
-        // small muzzle spark when just launched
-        if(h.state === 'flying'){
-          const launchProgress = Math.min(h.tFly / h.flyDuration, 1);
-          if(launchProgress < 0.12){
-            drawMuzzleSpark(ctx, h.from.x, h.from.y, launchProgress);
-          }
-        }
-        // small pickup swirl
-        if(h.state === 'picked' || h.state === 'holding'){
-          drawTinyGlow(ctx, h.x, h.y, 6 + 10*Math.sin(ms*0.02 + h.id));
-        }
-      }
-
-      // Save and apply rotation around center
-      ctx.save();
-      ctx.translate(center.x, center.y);
-      ctx.rotate(rotationAngle);
-      ctx.translate(-center.x, -center.y);
-
-      // Draw assembled arrived hearts (they follow target positions, but rotated as a group)
-      for(const h of hearts){
-        if(h.state !== 'arrived') continue;
-        // apply the same rotation to each heart's relative coordinate
-        // but since we already rotated the canvas, just draw at h.target
-        drawEmojiHeart(ctx, h.target.x, h.target.y, 34*h.scale, 0, 1, 8);
-      }
-
-      ctx.restore();
-
-      // Draw glowing "Te amo" text: visible once a meaningful number have arrived (we show after about 70% arrived)
-      const arrivedCount = hearts.filter(h=>h.state==='arrived').length;
-      if(arrivedCount >= Math.round(totalHearts*0.68)){
-        ctx.save();
-        ctx.font = "bold 64px Arial Rounded MT Bold, Arial, sans-serif";
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(250,79,134,1)';
-        ctx.shadowColor = 'rgba(255,19,97,0.95)';
-        ctx.shadowBlur = 36;
-        ctx.fillText('Te amo', center.x, canvas.height*0.18);
-        ctx.restore();
-      }
-
-      // Draw turrets (front)
-      const frame = animationTick;
-      // if dancing triggered after rotation:
-      const dancePhase = typeof dancing !== 'undefined' && dancing ? Math.min(1, (nowMs() - danceStart) / 320) : 0;
-      drawTurret(ctx, turretPositions.left.x, turretPositions.left.y, 'right', anyActive, dancePhase, frame);
-      drawTurret(ctx, turretPositions.right.x, turretPositions.right.y, 'left', anyActive, dancePhase, frame);
-
-      animationTick++;
-      last = ms;
-
-      // Stop condition: after dance for some time, we can optionally loop or stop. We'll keep animating for lively scene.
-      requestAnimationFrame(loop);
-    }
-
-    // tiny helper draws
-    function drawEmojiHeart(ctx,x,y,size,rot,alpha,glow=0){
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(rot);
-      ctx.globalAlpha = alpha;
-      ctx.font = `bold ${Math.max(14, Math.round(size))}px serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      if(glow){
-        ctx.shadowColor = '#ff1361';
-        ctx.shadowBlur = glow;
-      }
-      ctx.fillText('❤️', 0, 0);
-      ctx.restore();
-    }
-    function drawTinyGlow(ctx,x,y,sz){
-      ctx.save();
-      ctx.globalAlpha = 0.22;
-      ctx.fillStyle = '#ff4f7a';
-      ctx.beginPath();
-      ctx.ellipse(x,y,sz,sz*0.6,0,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
-    function drawMuzzleSpark(ctx,x,y,intensity){
-      ctx.save();
-      const g = ctx.createRadialGradient(x,y,0,x,y,18);
-      g.addColorStop(0,'rgba(255,255,255,'+(0.9*intensity)+')');
-      g.addColorStop(1,'rgba(255,80,120,0)');
-      ctx.fillStyle = g;
-      ctx.globalAlpha = 0.9;
-      ctx.beginPath();
-      ctx.ellipse(x + (Math.random()*6-3), y + (Math.random()*6-3), 22*intensity, 8*intensity, Math.random()*0.6,0,Math.PI*2);
-      ctx.fill();
-      ctx.restore();
-    }
-
-    // turret drawing: a bit more stylized/cute and with small arm recoil when shooting
-    function drawTurret(ctx,x,y,facing,shooting,dancing,frame){
-      ctx.save();
-      ctx.translate(x,y);
-      if(dancing){
-        const bob = Math.sin(frame*0.18 + (facing==='left'?1:0))*8;
-        const rot = Math.sin(frame*0.14 + (facing==='left'?2:0))*0.12;
-        ctx.translate(0,bob);
-        ctx.rotate(rot);
-      }
-      ctx.scale(facing==='left' ? -1 : 1, 1);
-
-      // base glow if shooting
-      if(shooting){
-        ctx.save();
-        ctx.globalAlpha = 0.22;
-        ctx.shadowColor = '#ff1361';
-        ctx.shadowBlur = 18;
-        ctx.beginPath();
-        ctx.arc(0,0,28,0,Math.PI*2);
-        ctx.fillStyle = '#ff1361';
-        ctx.fill();
-        ctx.restore();
-      }
-
-      // Body
-      ctx.beginPath();
-      ctx.fillStyle = '#fff';
-      ctx.arc(0,0,20,0,Math.PI*2);
-      ctx.fill();
-      // eyes
-      ctx.fillStyle = '#222';
-      ctx.beginPath(); ctx.arc(-7,-3,3.2,0,Math.PI*2); ctx.fill();
-      ctx.beginPath(); ctx.arc(7,-3,3.2,0,Math.PI*2); ctx.fill();
-      // smile
-      ctx.beginPath(); ctx.arc(0,8,7,Math.PI*0.14,Math.PI*0.86); ctx.lineWidth=2; ctx.strokeStyle='#222'; ctx.stroke();
-
-      // arms (shooting recoil)
-      ctx.save();
-      // shooting arm angle oscillates when shooting
-      const base = shooting ? (Math.sin(frame*0.5)*0.18 + 0.9) : 0.1;
-      ctx.rotate(-base);
-      ctx.beginPath();
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = '#fff';
-      ctx.arc(-15,10,7,Math.PI*0.36,Math.PI*1.6);
-      ctx.stroke();
-      ctx.lineWidth = 2; ctx.strokeStyle = '#222';
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.save();
-      ctx.rotate(base);
-      ctx.beginPath();
-      ctx.lineWidth = 7;
-      ctx.strokeStyle = '#fff';
-      ctx.arc(15,10,7,Math.PI*1.6,Math.PI*0.36,true);
-      ctx.stroke();
-      ctx.lineWidth = 2; ctx.strokeStyle = '#222';
-      ctx.stroke();
-      ctx.restore();
-
-      // saucer
-      ctx.save();
-      ctx.translate(0,26);
-      ctx.beginPath();
-      ctx.fillStyle = '#f0f0f0';
-      ctx.ellipse(0,0,26,9,0,0,Math.PI*2);
-      ctx.fill();
-      ctx.lineWidth=2;
-      ctx.strokeStyle='#bdbdbd';
-      ctx.stroke();
-      ctx.restore();
-
-      ctx.restore();
-    }
-
-    // Button click wiring
-    btn.addEventListener('click', ()=>{
-      start();
-      // hide hint
-      hint.style.opacity = 0;
+      setTimeout(() => { btn.style.display = 'none'; }, 600);
+      canvas.style.display = "block";
+      setupHeartAnimation();
+      drawScene();
     });
-
-    // Start a small idle hint animation for the button
-    (function pulseBtn(){
-      let dir = 1;
-      setInterval(()=>{
-        if(btn.style.display === 'none') return;
-        btn.style.transform = `translate(-50%,-50%) scale(${1 + 0.02 * Math.sin(performance.now()*0.003)})`;
-      }, 80);
-    })();
-
-    // Expose for debugging (optional)
-    window._HEARTS = hearts;
-
-  })();
   </script>
 </body>
 </html>
