@@ -4,37 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Te Amo Sorpresa</title>
-  <style>
-    body, html {
-      margin: 0; padding: 0;
-      width: 100vw; height: 100vh;
-      overflow: hidden; background: black;
-      font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
-    }
-    #stars-bg { position: absolute; width: 100vw; height: 100vh; left: 0; top: 0; z-index: 0;}
-    #center-btn {
-      position: absolute;
-      left: 50%; top: 50%; transform: translate(-50%, -50%);
-      background: #fff;
-      color: #222;
-      border: none;
-      padding: 1em 2em;
-      font-size: 2em;
-      border-radius: 1em;
-      box-shadow: 0 0 30px #fff7;
-      z-index: 2;
-      cursor: pointer;
-      transition: opacity 0.5s;
-    }
-    #surprise-canvas {
-      position: absolute;
-      left: 0; top: 0;
-      width: 100vw; height: 100vh;
-      z-index: 1;
-      pointer-events: none;
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="te-amo-stars.css" />
 </head>
 <body>
   <canvas id="stars-bg"></canvas>
@@ -207,4 +177,37 @@
         // Animate hearts flying to their spots
         for (const heart of hearts) {
           if (heart.progress < 1) {
-            heart.x
+            heart.x += (heart.tx - heart.x) * 0.07;
+            heart.y += (heart.ty - heart.y) * 0.07;
+            heart.progress += 0.06;
+            heart.rot += 0.2;
+          } else {
+            heart.x = heart.tx; heart.y = heart.ty;
+            heart.rot = 0;
+          }
+          drawPixelHeart(ctx, heart.x, heart.y, 18, heart.color, heart.rot);
+        }
+      }
+
+      // Big spinning heart
+      if (hearts.length === teAmoPixels.length) {
+        bigHeartAngle += 0.02;
+        drawPixelHeart(ctx, w/2, h/2 + 140, 44, '#ff1361', bigHeartAngle);
+        // Optionally add a glow
+        ctx.save();
+        ctx.globalAlpha = 0.2;
+        ctx.beginPath();
+        ctx.arc(w/2, h/2+140, 70, 0, Math.PI*2);
+        ctx.fillStyle = "#ff1361";
+        ctx.fill();
+        ctx.restore();
+      }
+
+      animFrame++;
+      requestAnimationFrame(animateSurprise);
+    }
+    animateSurprise();
+
+  </script>
+</body>
+</html>
