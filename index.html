@@ -8,7 +8,15 @@
 </head>
 <body>
   <div id="canvas-screen">
-    <canvas id="pixel-canvas" width="400" height="300"></canvas>
+    <div id="top-credit"></div>
+    <div id="start-screen">
+      <h1 class="pixel-text">Ready?</h1>
+      <button id="start-btn" class="pixel-btn">Start</button>
+    </div>
+    <div id="countdown-screen" style="display:none;">
+      <h1 id="countdown-num" class="pixel-text"></h1>
+    </div>
+    <canvas id="pixel-canvas" width="480" height="320" style="display:none;"></canvas>
     <div id="lyric" class="pixel-text"></div>
   </div>
   <script src="script.js"></script>
