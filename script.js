@@ -1,4 +1,4 @@
-// --- Pixel Lyric Animation with 3-2-1 Countdown Button ---
+// --- Pixel Lyric Animation for GitHub Pages ---
 // Created by @xhlazz
 
 const canvas = document.getElementById('pixel-canvas');
@@ -25,7 +25,7 @@ const lyricScenes = [
   { lyric: "ser tudo por um dia", duration: 240, granularity: 5 }
 ];
 
-// -------- Background Drawing Functions --------
+// ----------- Background Drawing -----------
 
 function drawPixelSky(frame) {
   let grad = ctx.createLinearGradient(0,0,0,canvas.height);
@@ -33,11 +33,10 @@ function drawPixelSky(frame) {
   grad.addColorStop(1, "#5e7bb1");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   for (let i = 0; i < 65; i++) {
     let x = (i * 39 + Math.sin(frame / 13 + i * 2) * 18) % canvas.width;
     let y = (i * 17 + Math.cos(frame / 9 + i * 3) * 12) % 110;
-    ctx.fillStyle = i % 3 == 0 ? "#fff" : "#aad";
+    ctx.fillStyle = i % 3 === 0 ? "#fff" : "#aad";
     ctx.globalAlpha = 0.7 + 0.3 * Math.sin(frame/30 + i);
     ctx.fillRect(Math.floor(x), Math.floor(y)+6, 2, 2);
     ctx.globalAlpha = 1;
@@ -106,7 +105,7 @@ function drawPixelHouses(frame) {
   }
 }
 
-// -------- Scene Actors --------
+// ----------- Scene Actors -----------
 
 function drawStickMan(x, y, frame, waving=false, armsUp=false, smile=false, color="#fff", halo=false, cross=false, glow=0) {
   ctx.save();
@@ -193,7 +192,6 @@ function drawStar(x, y, frame, scale=1.0, glow=0) {
   ctx.restore();
 }
 
-// Draw group of people (brothers, friends) dancing and cheering gently
 function drawPeopleGroup(frame, options={}) {
   const baseY = options.y || 190;
   let colors = ["#fff", "#aae", "#f99", "#9cf", "#ffd700"];
@@ -205,7 +203,7 @@ function drawPeopleGroup(frame, options={}) {
   }
 }
 
-// ----------- Lyric Highlight Logic -----------
+// ----------- Lyric Highlight -----------
 
 function getLyricHighlightHTML(line, duration, granularity, frame) {
   let words = line.split(' ');
@@ -226,34 +224,11 @@ function getLyricHighlightHTML(line, duration, granularity, frame) {
   return html.trim();
 }
 
-// -------- Scene Logic --------
+// ----------- Animation Scenes -----------
+
 let sceneIdx = 0;
 let sceneFrame = 0;
 
-// -------- Countdown Animation --------
-function showCountdownAnimation(callback) {
-  let num = 3;
-  countdownScreen.style.display = "";
-  countdownNum.textContent = "";
-  let interval;
-  function nextCount() {
-    countdownNum.textContent = num;
-    countdownNum.style.color = "#ffd700";
-    countdownNum.style.fontSize = "60px";
-    countdownNum.style.textShadow = "0 0 16px #fff";
-    num--;
-    if(num >= 0) {
-      setTimeout(nextCount, 700);
-    } else {
-      countdownScreen.style.display = "none";
-      canvas.style.display = "";
-      callback();
-    }
-  }
-  nextCount();
-}
-
-// -------- Main Animation --------
 function mainAnimate() {
   function animate() {
     ctx.clearRect(0,0,canvas.width,canvas.height);
@@ -264,7 +239,6 @@ function mainAnimate() {
     drawPixelHouses(sceneFrame);
     drawPixelGrass(sceneFrame);
     drawPixelRoad(sceneFrame);
-    // Credit already at top
 
     // --- Animate main story per lyric line ---
     let scene = lyricScenes[sceneIdx];
@@ -274,7 +248,6 @@ function mainAnimate() {
     let starY = 110;
 
     if(sceneIdx === 0) {
-      // Invitation: waving stick-man and group of calm brothers
       drawStickMan(80, mainY, sceneFrame, waving=true, false, smile=true, "#fff");
       drawPeopleGroup(sceneFrame, {y: mainY+14});
       ctx.font = "bold 11px 'Press Start 2P', cursive";
@@ -285,15 +258,13 @@ function mainAnimate() {
       ctx.fillStyle = "#222";
       ctx.fillText("Vem brilhar!", 138, mainY-43);
     } else if(sceneIdx === 1) {
-      // Second stick-man enters, glows, brothers cheer
       drawStickMan(80, mainY, sceneFrame, false, false, smile=true, "#fff");
-      let x = 350 - Math.max(0, 100 - sceneFrame); // slide in
+      let x = 350 - Math.max(0, 100 - sceneFrame);
       let glow = Math.min(1, sceneFrame/60);
       drawStickMan(x, secondY, sceneFrame, false, false, true, "#ffd700", false, false, glow);
       drawPeopleGroup(sceneFrame, {y: mainY+14});
       drawStickMan(80, mainY, sceneFrame, true, false, true, "#fff");
     } else if(sceneIdx === 2) {
-      // Morph into star, float above sun, brothers cheer
       let personY = secondY - Math.min(sceneFrame, 45);
       if (sceneFrame < 70) {
         drawStickMan(starX, personY, sceneFrame, false, false, true, "#ffd700");
@@ -304,30 +275,25 @@ function mainAnimate() {
       drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
       drawPeopleGroup(sceneFrame, {y: mainY+14});
     } else if(sceneIdx === 3) {
-      // Star sparkles and grows, people cheer
       drawStar(starX, 80, sceneFrame, 1.5 + 0.25*Math.sin(sceneFrame/7), 1.2);
       drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
       drawPeopleGroup(sceneFrame, {y: mainY+14});
     } else if(sceneIdx === 4) {
-      // Star pulses, sun glows, people look up
       drawStar(starX, 80, sceneFrame, 1.7 + 0.22 * Math.sin(sceneFrame/6), 2);
       drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
       drawPeopleGroup(sceneFrame, {y: mainY+14});
     } else if(sceneIdx === 5) {
-      // Jesus appears with cross, joins stick-man, brothers celebrate
       drawStar(starX, 80, sceneFrame, 1.6, 2);
       drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
       drawStickMan(180, mainY, sceneFrame, false, false, true, "#aae", true, true);
       drawPeopleGroup(sceneFrame, {y: mainY+14});
     } else if(sceneIdx === 6) {
-      // Jesus and stick-man dance gently, brothers sway calmly
       drawStar(starX, 80, sceneFrame, 1.6, 2);
       let dx = Math.sin(sceneFrame/28)*16;
       drawStickMan(80+dx, mainY, sceneFrame, false, true, true, "#fff");
       drawStickMan(180-dx, mainY, sceneFrame, false, true, true, "#aae", true, true);
       drawPeopleGroup(sceneFrame, {y: mainY+14});
     } else {
-      // Final scene: gentle glow, everyone together, calm unity
       drawStar(starX, 80, sceneFrame, 1.7, 2);
       drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
       drawStickMan(180, mainY, sceneFrame, false, true, true, "#aae", true, true);
@@ -356,7 +322,31 @@ function mainAnimate() {
   animate();
 }
 
-// -------- Start Button Logic --------
+// ----------- Countdown Animation -----------
+
+function showCountdownAnimation(callback) {
+  let num = 3;
+  countdownScreen.style.display = "";
+  countdownNum.textContent = "";
+  function nextCount() {
+    countdownNum.textContent = num > 0 ? num : "";
+    countdownNum.style.color = "#ffd700";
+    countdownNum.style.fontSize = "60px";
+    countdownNum.style.textShadow = "0 0 16px #fff";
+    if(num > 0) {
+      num--;
+      setTimeout(nextCount, 700);
+    } else {
+      countdownScreen.style.display = "none";
+      canvas.style.display = "";
+      callback();
+    }
+  }
+  nextCount();
+}
+
+// ----------- Start Button Logic -----------
+
 startBtn.onclick = () => {
   startScreen.style.display = "none";
   showCountdownAnimation(mainAnimate);
