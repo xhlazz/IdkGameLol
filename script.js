@@ -1,9 +1,17 @@
-// --- Pixel Lyric Animation with More People, Rhythm, Cross, and Improved Style ---
+// --- Pixel Lyric Animation with 3-2-1 Countdown Button ---
 // Created by @xhlazz
 
 const canvas = document.getElementById('pixel-canvas');
 const ctx = canvas.getContext('2d');
 const lyricElem = document.getElementById('lyric');
+const startScreen = document.getElementById('start-screen');
+const countdownScreen = document.getElementById('countdown-screen');
+const countdownNum = document.getElementById('countdown-num');
+const startBtn = document.getElementById('start-btn');
+const topCredit = document.getElementById('top-credit');
+
+// Show credit at top
+topCredit.textContent = "Created by @xhlazz";
 
 // Lyric lines, timings (frames at 60fps), and highlight granularity
 const lyricScenes = [
@@ -19,7 +27,6 @@ const lyricScenes = [
 
 // -------- Background Drawing Functions --------
 
-// Draw retro pixel sky with stars
 function drawPixelSky(frame) {
   let grad = ctx.createLinearGradient(0,0,0,canvas.height);
   grad.addColorStop(0, "#273148");
@@ -37,7 +44,6 @@ function drawPixelSky(frame) {
   }
 }
 
-// Draw pixel sun (always in the sky, at one place)
 function drawPixelSun(x, y, frame, brightness=1.0) {
   ctx.save();
   ctx.beginPath();
@@ -56,7 +62,6 @@ function drawPixelSun(x, y, frame, brightness=1.0) {
   ctx.restore();
 }
 
-// Draw pixel grass
 function drawPixelGrass(frame) {
   for (let x = 0; x < canvas.width; x += 7) {
     let h = 17 + Math.sin((frame/9) + x/19) * 5;
@@ -70,7 +75,6 @@ function drawPixelGrass(frame) {
   ctx.lineWidth = 1;
 }
 
-// Draw pixel road
 function drawPixelRoad(frame) {
   ctx.fillStyle = "#2d2d2d";
   ctx.fillRect(0, 246, canvas.width, 36);
@@ -81,7 +85,6 @@ function drawPixelRoad(frame) {
   }
 }
 
-// Draw pixel houses
 function drawPixelHouses(frame) {
   const houseColors = ["#db7a34", "#e8e6e1", "#5792e3", "#ffd700", "#b8db7a"];
   for (let i = 0; i < 5; i++) {
@@ -103,17 +106,8 @@ function drawPixelHouses(frame) {
   }
 }
 
-// Draw credit text at top
-function drawCreditText() {
-  ctx.font = "bold 14px 'Press Start 2P', cursive";
-  ctx.fillStyle = "#ffd700";
-  ctx.textAlign = "center";
-  ctx.fillText("Created by @xhlazz", canvas.width/2, 22);
-}
-
 // -------- Scene Actors --------
 
-// Draw stick-man (retro pixel style, many options)
 function drawStickMan(x, y, frame, waving=false, armsUp=false, smile=false, color="#fff", halo=false, cross=false, glow=0) {
   ctx.save();
   // Draw cross if needed (Jesus)
@@ -186,7 +180,6 @@ function drawStickMan(x, y, frame, waving=false, armsUp=false, smile=false, colo
   ctx.restore();
 }
 
-// Draw pixel star (animated)
 function drawStar(x, y, frame, scale=1.0, glow=0) {
   ctx.save();
   ctx.translate(x, y);
@@ -214,7 +207,6 @@ function drawPeopleGroup(frame, options={}) {
 
 // ----------- Lyric Highlight Logic -----------
 
-// Returns HTML for lyric line with one word/phrase highlighted by time
 function getLyricHighlightHTML(line, duration, granularity, frame) {
   let words = line.split(' ');
   let wordFrames = Math.floor(duration / granularity);
@@ -238,102 +230,134 @@ function getLyricHighlightHTML(line, duration, granularity, frame) {
 let sceneIdx = 0;
 let sceneFrame = 0;
 
-function animate() {
-  // --- Draw background ---
-  drawPixelSky(sceneFrame);
-  drawPixelSun(400, 60, sceneFrame, 1.0); // Only 1 sun in the sky
-  drawPixelHouses(sceneFrame);
-  drawPixelGrass(sceneFrame);
-  drawPixelRoad(sceneFrame);
-  drawCreditText();
-
-  // --- Animate main story per lyric line ---
-  let scene = lyricScenes[sceneIdx];
-  let mainY = 190;
-  let secondY = 190;
-  let starX = 350;
-  let starY = 110;
-
-  if(sceneIdx === 0) {
-    // Invitation: waving stick-man and group of calm brothers
-    drawStickMan(80, mainY, sceneFrame, waving=true, false, smile=true, "#fff");
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-    ctx.font = "bold 11px 'Press Start 2P', cursive";
-    ctx.fillStyle = "#ffd700";
-    ctx.globalAlpha = 0.8;
-    ctx.fillRect(120, mainY-60, 122, 24);
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = "#222";
-    ctx.fillText("Vem brilhar!", 138, mainY-43);
-  } else if(sceneIdx === 1) {
-    // Second stick-man enters, glows, brothers cheer
-    drawStickMan(80, mainY, sceneFrame, false, false, smile=true, "#fff");
-    let x = 350 - Math.max(0, 100 - sceneFrame); // slide in
-    let glow = Math.min(1, sceneFrame/60);
-    drawStickMan(x, secondY, sceneFrame, false, false, true, "#ffd700", false, false, glow);
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-    drawStickMan(80, mainY, sceneFrame, true, false, true, "#fff");
-  } else if(sceneIdx === 2) {
-    // Morph into star, float above sun, brothers cheer
-    let personY = secondY - Math.min(sceneFrame, 45);
-    if (sceneFrame < 70) {
-      drawStickMan(starX, personY, sceneFrame, false, false, true, "#ffd700");
+// -------- Countdown Animation --------
+function showCountdownAnimation(callback) {
+  let num = 3;
+  countdownScreen.style.display = "";
+  countdownNum.textContent = "";
+  let interval;
+  function nextCount() {
+    countdownNum.textContent = num;
+    countdownNum.style.color = "#ffd700";
+    countdownNum.style.fontSize = "60px";
+    countdownNum.style.textShadow = "0 0 16px #fff";
+    num--;
+    if(num >= 0) {
+      setTimeout(nextCount, 700);
     } else {
-      let starAscendY = personY - (sceneFrame - 70) * 0.7;
-      drawStar(starX, Math.max(80, starAscendY), sceneFrame, 1 + Math.min(1, (sceneFrame-70)/38), 1.2);
-    }
-    drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-  } else if(sceneIdx === 3) {
-    // Star sparkles and grows, people cheer
-    drawStar(starX, 80, sceneFrame, 1.5 + 0.25*Math.sin(sceneFrame/7), 1.2);
-    drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-  } else if(sceneIdx === 4) {
-    // Star pulses, sun glows, people look up
-    drawStar(starX, 80, sceneFrame, 1.7 + 0.22 * Math.sin(sceneFrame/6), 2);
-    drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-  } else if(sceneIdx === 5) {
-    // Jesus appears with cross, joins stick-man, brothers celebrate
-    drawStar(starX, 80, sceneFrame, 1.6, 2);
-    drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
-    // Jesus stick-man with cross and halo
-    drawStickMan(180, mainY, sceneFrame, false, false, true, "#aae", true, true);
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-  } else if(sceneIdx === 6) {
-    // Jesus and stick-man dance gently, brothers sway calmly
-    drawStar(starX, 80, sceneFrame, 1.6, 2);
-    let dx = Math.sin(sceneFrame/28)*16;
-    drawStickMan(80+dx, mainY, sceneFrame, false, true, true, "#fff");
-    drawStickMan(180-dx, mainY, sceneFrame, false, true, true, "#aae", true, true);
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-  } else {
-    // Final scene: gentle glow, everyone together, calm unity
-    drawStar(starX, 80, sceneFrame, 1.7, 2);
-    drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
-    drawStickMan(180, mainY, sceneFrame, false, true, true, "#aae", true, true);
-    drawPeopleGroup(sceneFrame, {y: mainY+14});
-    ctx.font = "bold 22px 'Press Start 2P', cursive";
-    ctx.fillStyle = "#fff";
-    ctx.globalAlpha = 0.7 + 0.3*Math.abs(Math.sin(sceneFrame/20));
-    ctx.fillText("Fim!", canvas.width/2, 140);
-    ctx.globalAlpha = 1;
-  }
-
-  // --- Lyric Highlight at rhythm ---
-  lyricElem.innerHTML = getLyricHighlightHTML(scene.lyric, scene.duration, scene.granularity, sceneFrame);
-
-  sceneFrame++;
-  if (sceneFrame > scene.duration) {
-    sceneIdx++;
-    sceneFrame = 0;
-    if (sceneIdx >= lyricScenes.length) {
-      lyricElem.innerHTML = `<span class="highlight">Fim!</span>`;
-      return;
+      countdownScreen.style.display = "none";
+      canvas.style.display = "";
+      callback();
     }
   }
-  requestAnimationFrame(animate);
+  nextCount();
 }
 
-animate();
+// -------- Main Animation --------
+function mainAnimate() {
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    // --- Draw background ---
+    drawPixelSky(sceneFrame);
+    drawPixelSun(400, 60, sceneFrame, 1.0); // Only 1 sun in the sky
+    drawPixelHouses(sceneFrame);
+    drawPixelGrass(sceneFrame);
+    drawPixelRoad(sceneFrame);
+    // Credit already at top
+
+    // --- Animate main story per lyric line ---
+    let scene = lyricScenes[sceneIdx];
+    let mainY = 190;
+    let secondY = 190;
+    let starX = 350;
+    let starY = 110;
+
+    if(sceneIdx === 0) {
+      // Invitation: waving stick-man and group of calm brothers
+      drawStickMan(80, mainY, sceneFrame, waving=true, false, smile=true, "#fff");
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+      ctx.font = "bold 11px 'Press Start 2P', cursive";
+      ctx.fillStyle = "#ffd700";
+      ctx.globalAlpha = 0.8;
+      ctx.fillRect(120, mainY-60, 122, 24);
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = "#222";
+      ctx.fillText("Vem brilhar!", 138, mainY-43);
+    } else if(sceneIdx === 1) {
+      // Second stick-man enters, glows, brothers cheer
+      drawStickMan(80, mainY, sceneFrame, false, false, smile=true, "#fff");
+      let x = 350 - Math.max(0, 100 - sceneFrame); // slide in
+      let glow = Math.min(1, sceneFrame/60);
+      drawStickMan(x, secondY, sceneFrame, false, false, true, "#ffd700", false, false, glow);
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+      drawStickMan(80, mainY, sceneFrame, true, false, true, "#fff");
+    } else if(sceneIdx === 2) {
+      // Morph into star, float above sun, brothers cheer
+      let personY = secondY - Math.min(sceneFrame, 45);
+      if (sceneFrame < 70) {
+        drawStickMan(starX, personY, sceneFrame, false, false, true, "#ffd700");
+      } else {
+        let starAscendY = personY - (sceneFrame - 70) * 0.7;
+        drawStar(starX, Math.max(80, starAscendY), sceneFrame, 1 + Math.min(1, (sceneFrame-70)/38), 1.2);
+      }
+      drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+    } else if(sceneIdx === 3) {
+      // Star sparkles and grows, people cheer
+      drawStar(starX, 80, sceneFrame, 1.5 + 0.25*Math.sin(sceneFrame/7), 1.2);
+      drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+    } else if(sceneIdx === 4) {
+      // Star pulses, sun glows, people look up
+      drawStar(starX, 80, sceneFrame, 1.7 + 0.22 * Math.sin(sceneFrame/6), 2);
+      drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+    } else if(sceneIdx === 5) {
+      // Jesus appears with cross, joins stick-man, brothers celebrate
+      drawStar(starX, 80, sceneFrame, 1.6, 2);
+      drawStickMan(80, mainY, sceneFrame, false, false, true, "#fff");
+      drawStickMan(180, mainY, sceneFrame, false, false, true, "#aae", true, true);
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+    } else if(sceneIdx === 6) {
+      // Jesus and stick-man dance gently, brothers sway calmly
+      drawStar(starX, 80, sceneFrame, 1.6, 2);
+      let dx = Math.sin(sceneFrame/28)*16;
+      drawStickMan(80+dx, mainY, sceneFrame, false, true, true, "#fff");
+      drawStickMan(180-dx, mainY, sceneFrame, false, true, true, "#aae", true, true);
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+    } else {
+      // Final scene: gentle glow, everyone together, calm unity
+      drawStar(starX, 80, sceneFrame, 1.7, 2);
+      drawStickMan(80, mainY, sceneFrame, false, true, true, "#fff");
+      drawStickMan(180, mainY, sceneFrame, false, true, true, "#aae", true, true);
+      drawPeopleGroup(sceneFrame, {y: mainY+14});
+      ctx.font = "bold 22px 'Press Start 2P', cursive";
+      ctx.fillStyle = "#fff";
+      ctx.globalAlpha = 0.7 + 0.3*Math.abs(Math.sin(sceneFrame/20));
+      ctx.fillText("Fim!", canvas.width/2, 140);
+      ctx.globalAlpha = 1;
+    }
+
+    // --- Lyric Highlight at rhythm ---
+    lyricElem.innerHTML = getLyricHighlightHTML(scene.lyric, scene.duration, scene.granularity, sceneFrame);
+
+    sceneFrame++;
+    if (sceneFrame > scene.duration) {
+      sceneIdx++;
+      sceneFrame = 0;
+      if (sceneIdx >= lyricScenes.length) {
+        lyricElem.innerHTML = `<span class="highlight">Fim!</span>`;
+        return;
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+// -------- Start Button Logic --------
+startBtn.onclick = () => {
+  startScreen.style.display = "none";
+  showCountdownAnimation(mainAnimate);
+};
