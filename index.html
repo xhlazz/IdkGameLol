@@ -1,24 +1,263 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Pixel Lyric Story Animation</title>
-  <link href="https://fonts.googleapis.com/css?family=Press+Start+2P" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>About xhlazz</title>
+
+  <!-- Inter font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <div id="canvas-screen">
-    <div id="top-credit"></div>
-    <div id="start-screen">
-      <h1 class="pixel-text">Ready?</h1>
-      <button id="start-btn" class="pixel-btn">Start</button>
+<body class="theme-dark">
+  <header class="site-header">
+    <div class="container header-inner">
+      <a class="brand" href="#hero" aria-label="About xhlazz">
+        <span class="logo">xhlazz</span>
+      </a>
+      <nav class="nav">
+        <a href="#hero">Home</a>
+        <a href="#portfolio">Portfolio</a>
+        <a href="#store">Store</a>
+        <a href="#memories">Memories</a>
+        <a href="#mini-games">Mini Games</a>
+        <a href="#contact">Contact</a>
+      </nav>
     </div>
-    <div id="countdown-screen" style="display:none;">
-      <h1 id="countdown-num" class="pixel-text"></h1>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="hero" class="hero section center">
+      <div class="container">
+        <h1 id="mainTitle" class="neon-title">About xhlazz</h1>
+        <p class="lead" id="miniBio">I'm a Roblox dev with hopes of making big games — for now building and learning, one project at a time.</p>
+
+        <div id="birthdayBlock" class="birthday-block">
+          <div class="countdown" aria-live="polite">
+            <div class="countdown-item"><span id="months">--</span><small>months</small></div>
+            <div class="countdown-item"><span id="days">--</span><small>days</small></div>
+            <div class="countdown-item"><span id="hours">--</span><small>hours</small></div>
+            <div class="countdown-item"><span id="minutes">--</span><small>minutes</small></div>
+            <div class="countdown-item"><span id="seconds">--</span><small>seconds</small></div>
+          </div>
+
+          <div class="countdown-controls">
+            <button id="simulateNow" class="btn ghost">Simulate birthday now</button>
+            <button id="simulate10s" class="btn ghost">Simulate 10s</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PORTFOLIO -->
+    <section id="portfolio" class="section container reveal">
+      <h2>Portfolio</h2>
+      <p class="muted">Featured Roblox projects — click a card to open the game or preview.</p>
+
+      <div class="cards portfolio-cards">
+        <!-- Game 1 (CLOSED - Remake) -->
+        <article class="card game-card">
+          <div class="thumb-wrap animated-frame">
+            <!-- Local asset (Image 1) -->
+            <img class="thumb animated-thumb" alt="CLOSED - Remake preview"
+                 src="assets/game1.png"
+                 data-title="CLOSED - Remake: The Strongest Powers" />
+          </div>
+          <div class="card-body">
+            <h3>CLOSED - Remake: The Strongest Powers</h3>
+            <p class="muted">A remake of The Strongest Powers — place ID: 17860191074</p>
+            <div class="card-actions">
+              <a class="link-btn" href="https://www.roblox.com/games/17860191074/CLOSED-Remake-The-Strongest-Powers" target="_blank" rel="noopener">Play / View</a>
+              <button class="link-btn preview-btn">Preview</button>
+            </div>
+          </div>
+        </article>
+
+        <!-- Game 2 (MOVED - The Strongest Powers) -->
+        <article class="card game-card">
+          <div class="thumb-wrap animated-frame">
+            <!-- Local asset (Image 2) -->
+            <img class="thumb animated-thumb" alt="MOVED - The Strongest Powers preview"
+                 src="assets/game2.png"
+                 data-title="MOVED - The Strongest Powers" />
+          </div>
+          <div class="card-body">
+            <h3>MOVED - The Strongest Powers</h3>
+            <p class="muted">Archived / moved listing — place ID: 17610766244</p>
+            <div class="card-actions">
+              <a class="link-btn" href="https://www.roblox.com/games/17610766244/MOVED-The-Strongest-Powers" target="_blank" rel="noopener">Play / View</a>
+              <button class="link-btn preview-btn">Preview</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- GROUP STORE -->
+    <section id="store" class="section container reveal">
+      <h2>Group Store — XLAZ CLOTHES</h2>
+      <p class="muted">Official group store for clothing and merch for my projects.</p>
+      <div class="cards">
+        <article class="card store-card">
+          <div class="thumb-wrap animated-frame">
+            <!-- Local asset (Image 3) -->
+            <img class="thumb animated-thumb store-thumb" alt="XLAZ CLOTHES store preview"
+                 src="assets/store.png"
+                 data-title="XLAZ CLOTHES Store" />
+          </div>
+          <div class="card-body">
+            <h3>XLAZ CLOTHES</h3>
+            <p class="muted store-desc">Group store with clothing items, shirts, and accessories. New drops and seasonal items will appear here — perfect for players who want to rep the brand in-game.</p>
+            <div class="card-actions">
+              <a class="link-btn" href="https://www.roblox.com/communities/440897980/XLAZ-CLOTHES#!/store" target="_blank" rel="noopener">Open Store</a>
+              <button class="link-btn" id="storePreviewBtn">Preview</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- MEMORIES -->
+    <section id="memories" class="section container reveal">
+      <h2>Memories</h2>
+      <p class="muted">Snapshots from development, events, and memorable moments.</p>
+
+      <div class="memories-grid">
+        <article class="memory-card card" data-title="First Dev Jam" data-desc="First time showcasing a prototype at an event.">
+          <div class="thumb-wrap animated-frame">
+            <img class="memory-thumb animated-thumb" alt="First Dev Jam"
+                 src="assets/memory1.png"
+                 data-full="assets/memory1-large.png" />
+          </div>
+          <div class="card-body">
+            <h3>First Dev Jam</h3>
+            <p class="muted">First time showcasing a prototype at an event.</p>
+          </div>
+        </article>
+
+        <article class="memory-card card" data-title="Team Collab" data-desc="Working late nights with the team to polish features.">
+          <div class="thumb-wrap animated-frame">
+            <img class="memory-thumb animated-thumb" alt="Team Collab"
+                 src="assets/memory2.png"
+                 data-full="assets/memory2-large.png" />
+          </div>
+          <div class="card-body">
+            <h3>Team Collab</h3>
+            <p class="muted">Working late nights with the team to polish features.</p>
+          </div>
+        </article>
+
+        <article class="memory-card card" data-title="First Release" data-desc="The day we launched a public playtest — unforgettable!">
+          <div class="thumb-wrap animated-frame">
+            <img class="memory-thumb animated-thumb" alt="First Release"
+                 src="assets/memory3.png"
+                 data-full="assets/memory3-large.png" />
+          </div>
+          <div class="card-body">
+            <h3>First Release</h3>
+            <p class="muted">The day we launched a public playtest — unforgettable!</p>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- MINI GAMES & BIRTHDAY INTERACTIONS -->
+    <section id="mini-games" class="section container reveal">
+      <h2>Mini Games & Birthday Fun</h2>
+      <p class="muted">Play quick mini-games, click the cake, or celebrate when the countdown hits zero.</p>
+
+      <div class="cards mini-cards">
+        <article class="card">
+          <h3>Clickable Cake</h3>
+          <p class="muted">Click the cake to blow candles and trigger confetti. Try it now.</p>
+          <div class="card-body cake-area">
+            <div id="cake" class="cake" role="button" tabindex="0" aria-label="Click cake to blow candles">
+              <div class="candles">
+                <span class="candle" data-id="1"></span>
+                <span class="candle" data-id="2"></span>
+                <span class="candle" data-id="3"></span>
+                <span class="candle" data-id="4"></span>
+                <span class="candle" data-id="5"></span>
+              </div>
+              <div class="cake-body">🎂</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Balloon Pop</h3>
+          <p class="muted">Pop balloons for points — quick reflex test.</p>
+          <div class="card-actions">
+            <button id="openBalloon" class="link-btn">Play Balloon Pop</button>
+          </div>
+        </article>
+
+        <article class="card">
+          <h3>Candle Blow</h3>
+          <p class="muted">Blow out all candles — works with the cake interaction.</p>
+          <div class="card-actions">
+            <button id="openCandle" class="link-btn">Try Candle Blow</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section id="contact" class="section container reveal">
+      <h2>Contact</h2>
+      <p class="muted">Find me on social media.</p>
+      <div class="contact-row social-row">
+        <a class="social" href="https://www.instagram.com/xhlazz" target="_blank" rel="noopener" aria-label="Instagram">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.4" />
+            <circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.4" />
+            <circle cx="17.5" cy="6.5" r="0.6" fill="currentColor" />
+          </svg>
+        </a>
+
+        <a class="social" href="https://www.tiktok.com/@xhlazz" target="_blank" rel="noopener" aria-label="TikTok">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M9 8v8a3 3 0 0 0 3 3 3 3 0 0 0 3-3V6h2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M15 4v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+        </a>
+
+        <a class="social" href="https://discord.com/users/996117984928088167" target="_blank" rel="noopener" aria-label="Discord">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7.5 16.5c0 0 1.5-1 3.5-1s3.5 1 3.5 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M8 9.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor"/>
+            <path d="M16 9.5a1 1 0 1 0 0 2 1 1 0 0 0 0-2z" fill="currentColor"/>
+            <rect x="3" y="4" width="18" height="16" rx="3" stroke="currentColor" stroke-width="1.2" />
+          </svg>
+        </a>
+
+        <a class="social" href="https://www.roblox.com/users/2774517806/profile" target="_blank" rel="noopener" aria-label="Roblox">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21.4 7.9 16.1 5.3a1.6 1.6 0 0 0-1.7.3L5.6 14.5a1.2 1.2 0 0 0-.4.9v3.2c0 .8.9 1.5 1.7 1.1l10.6-4.2a1.3 1.3 0 0 0 .8-1.2V9.6l2.1-1.7a.9.9 0 0 0-.4-1z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round" fill="currentColor"/>
+          </svg>
+        </a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <small id="footerYear">© <span id="year"></span> xhlazz — designed minimal · neon white</small>
     </div>
-    <canvas id="pixel-canvas" width="480" height="320" style="display:none;"></canvas>
-    <div id="lyric" class="pixel-text"></div>
+  </footer>
+
+  <!-- modal for previews / games -->
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-inner">
+      <button id="modalClose" class="modal-close" aria-label="Close">✕</button>
+      <div id="modalContent"></div>
+    </div>
   </div>
+
+  <canvas id="confettiCanvas" class="confetti-canvas" aria-hidden="true"></canvas>
+
   <script src="script.js"></script>
 </body>
 </html>
